@@ -37,6 +37,8 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
+    'app',
+    'rest_framework'
 ]
 
 MIDDLEWARE = [
@@ -76,11 +78,14 @@ WSGI_APPLICATION = 'pokepoint.wsgi.application'
 
 DATABASES = {
     'default': {
-        'ENGINE': 'django.db.backends.sqlite3',
-        'NAME': BASE_DIR / 'db.sqlite3',
+        'ENGINE': 'django.db.backends.postgresql_psycopg2',
+        'NAME': 'pokepoint',
+        'USER': 'django_pokepoint',
+        'PASSWORD': 'bacalhaucomazeite',
+        'HOST': '94.130.97.204',
+        'PORT': '5432',
     }
 }
-
 
 # Password validation
 # https://docs.djangoproject.com/en/3.2/ref/settings/#auth-password-validators
