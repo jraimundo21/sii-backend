@@ -9,5 +9,8 @@ urlpatterns = [
     path('api/timecards/', views.TimeCardList.as_view(), name='timecard_list'),
     path('api/timecards/<int:pk>/', views.TimeCardDetail.as_view(), name='employee_detail'),
    # path('api/workplaces/', views.WorkplaceList.as_view(), name='workplace_list'),
+   # ------- checkIn
+    path('api/checkin/', views.CheckInList.as_view(), name='checkin'),
+
 ]
 

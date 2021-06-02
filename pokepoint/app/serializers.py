@@ -6,13 +6,13 @@ from .models import Employee, Company, Workplace, TimeCard, Manager, CheckIn, Ch
 class CheckInSerializer(serializers.ModelSerializer):
     class Meta:
         model = CheckIn
-        fields = ['id', 'workplace', 'checkInType', 'timeCard', 'timeStamp']
+        fields = ['id', 'workplace_id', 'checkInType_id', 'timeCard_id', 'timestamp']
 
 
 class CheckOutSerializer(serializers.ModelSerializer):
     class Meta:
         model = CheckOut
-        fields = ['id', 'workplace', 'timeCard', 'timeStamp']
+        fields = ['id', 'workplace_id', 'timeCard', 'timestamp']
 
 
 class WorkplaceSerializer(serializers.ModelSerializer):
@@ -22,17 +22,16 @@ class WorkplaceSerializer(serializers.ModelSerializer):
 
 
 class TimeCardSerializer(serializers.ModelSerializer):
-    checkIn = CheckInSerializer(many=False, read_only=True)
-    checkOut = CheckOutSerializer(many=False, read_only=True)
-
+    checkIn = CheckInSerializer(many=True, read_only=True)
+    checkOut = CheckOutSerializer(many=True, read_only=True)
     class Meta:
         model = TimeCard
         fields = ['id', 'checkIn', 'checkOut', 'employee']
 
 
 class TimeCardDetailSerializer(serializers.ModelSerializer):
-    checkIn = CheckInSerializer(many=False, read_only=True)
-    checkOut = CheckOutSerializer(many=False, read_only=True)
+    checkIn = CheckInSerializer(many=True, read_only=True)
+    checkOut = CheckOutSerializer(many=True, read_only=True)
 
     class Meta:
         model = TimeCard
@@ -56,7 +55,7 @@ class CompanySerializer(serializers.ModelSerializer):
 
 
 class EmployeeTimeCardSerializer(serializers.ModelSerializer):
-    timeCards = TimeCardSerializer(many=False, read_only=True)
+    timeCards = TimeCardSerializer(many=True, read_only=True)
 
     class Meta:
         model = Employee

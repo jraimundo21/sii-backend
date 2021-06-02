@@ -36,17 +36,17 @@ class CheckInType(models.Model):
 
 
 class TimeCard(models.Model):
-    employee = models.ForeignKey(Employee, on_delete=models.DO_NOTHING)
+    employee = models.ForeignKey(Employee, on_delete=models.DO_NOTHING,related_name='timeCards')
 
 
 class CheckIn(models.Model):
     workplace = models.ForeignKey(Workplace, on_delete=models.DO_NOTHING)
     checkInType = models.ForeignKey(CheckInType, on_delete=models.DO_NOTHING)
-    timeCard = models.ForeignKey(TimeCard, on_delete=models.DO_NOTHING)
+    timeCard = models.ForeignKey(TimeCard, on_delete=models.DO_NOTHING, related_name='checkIn')
     timestamp = models.DateTimeField("time of checkin")
 
 
 class CheckOut(models.Model):
     workplace = models.ForeignKey(Workplace, on_delete=models.DO_NOTHING)
-    timeCard = models.ForeignKey(TimeCard, on_delete=models.DO_NOTHING)
+    timeCard = models.ForeignKey(TimeCard, on_delete=models.DO_NOTHING, related_name='checkOut')
     timestamp = models.DateTimeField("time of checkout")
