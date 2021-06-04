@@ -28,16 +28,6 @@ class TimeCardSerializer(serializers.ModelSerializer):
         model = TimeCard
         fields = ['id', 'checkIn', 'checkOut', 'employee']
 
-
-class TimeCardDetailSerializer(serializers.ModelSerializer):
-    checkIn = CheckInSerializer(many=True, read_only=True)
-    checkOut = CheckOutSerializer(many=True, read_only=True)
-
-    class Meta:
-        model = TimeCard
-        fields = ['id', 'checkIn', 'checkOut', 'employee']
-
-
 class EmployeeSerializer(serializers.ModelSerializer):
     timeCards = TimeCardSerializer(many=True, read_only=True)
 
