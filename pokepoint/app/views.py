@@ -4,7 +4,7 @@ from django.shortcuts import render, HttpResponse, Http404, get_object_or_404, \
 from rest_framework.views import APIView, Response, status
 
 from .models import Employee, TimeCard, CheckIn, Company, Workplace,CheckOut
-from .serializers import EmployeeSerializer, TimeCardSerializer, TimeCardDetailSerializer, CheckInSerializer,CheckOutSerializer, CompanySerializer, WorkplaceSerializer
+from .serializers import EmployeeSerializer, TimeCardSerializer, CheckInSerializer,CheckOutSerializer, CompanySerializer, WorkplaceSerializer
 
 
 # === API ===
@@ -226,7 +226,7 @@ class TimeCardDetail(APIView):
 
     def get(self, request, pk):
         timeCard = get_object_or_404(TimeCard, pk=pk)
-        serializer = TimeCardDetailSerializer(timeCard, many=False)
+        serializer = TimeCardSerializer(timeCard, many=False)
         return Response(serializer.data)
 
     def put(self, request, pk):
