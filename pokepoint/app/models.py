@@ -1,4 +1,6 @@
+from django.conf import settings
 from django.db import models
+from django.contrib.auth.models import User
 
 # Create your models here.
 
@@ -10,6 +12,7 @@ class Employee(models.Model):
     email = models.EmailField(max_length=100)
     phone = models.CharField(max_length=20)
     worksAtCompany = models.ForeignKey('Company', on_delete=models.DO_NOTHING)
+    user = models.ForeignKey(settings.AUTH_USER_MODEL,on_delete=models.CASCADE)
 
 
 class Company(models.Model):
@@ -21,8 +24,8 @@ class Company(models.Model):
 
 
 class Manager(models.Model):
-    employeeManager = models.ForeignKey(Employee, on_delete=models.DO_NOTHING)
-    companyManager = models.ForeignKey(Company, on_delete=models.CASCADE)
+    employee = models.ForeignKey(Employee, on_delete=models.DO_NOTHING,related_name='manager')
+    company = models.ForeignKey(Company, on_delete=models.CASCADE,related_name='manager')
 
 
 class Workplace(models.Model):

@@ -1,0 +1,43 @@
+<nav id="sidebarMenu" class="col-md-3 col-lg-2 d-md-block bg-light sidebar collapse">
+          <div class="position-sticky pt-3">
+            <ul class="nav flex-column">
+              <li class="nav-item">
+                <a class="nav-link active" aria-current="page" href="{% url 'index' %}">
+                  <span data-feather="Dashboard"></span>
+                  Dashboard
+                </a>
+              </li>
+              <li class="nav-item">
+                <a class="nav-link" href="{% url 'list_employee' %}">
+                  <span data-feather="file"></span>
+                  Employee
+                </a>
+              </li>
+              <li class="nav-item">
+                <a class="nav-link" href="{% url 'list_checkin' %}">
+                  <span data-feather="Check-in"></span>
+                  Check-in
+                </a>
+              </li>
+              <li class="nav-item">
+                <a class="nav-link" href="{% url 'list_checkout' %}">
+                  <span data-feather="Checkout"></span>
+                  Check-out
+                </a>
+              </li>
+              <li class="nav-item">
+                <a class="nav-link" href="{% url 'list_workplace' %}">
+                  <span data-feather="bar-chart-2"></span>
+                  Workplace
+                </a>
+              </li>
+              <li class="nav-item">
+                <a class="nav-link" href="#">
+                  <span data-feather="layers"></span>
+                  Reports
+                </a>
+              </li>
+            </ul>
+
+            </div>
+</nav>
