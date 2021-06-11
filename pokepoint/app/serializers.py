@@ -1,7 +1,8 @@
 from rest_framework import serializers
 
 from .models import Employee, Company, Workplace, TimeCard, Manager, CheckIn, CheckOut
-
+from django.contrib.auth.models import User
+from django.contrib.auth.hashers import make_password
 
 class CheckInSerializer(serializers.ModelSerializer):
     class Meta:
@@ -18,15 +19,17 @@ class CheckOutSerializer(serializers.ModelSerializer):
 class WorkplaceSerializer(serializers.ModelSerializer):
     class Meta:
         model = Workplace
-        fields = ['id', 'company_id','address','name'  ]
+        fields = ['id', 'company_id', 'address', 'name']
 
 
 class TimeCardSerializer(serializers.ModelSerializer):
     checkIn = CheckInSerializer(many=True, read_only=True)
     checkOut = CheckOutSerializer(many=True, read_only=True)
+
     class Meta:
         model = TimeCard
         fields = ['id', 'checkIn', 'checkOut', 'employee']
+
 
 class EmployeeSerializer(serializers.ModelSerializer):
     timeCards = TimeCardSerializer(many=True, read_only=True)
@@ -34,20 +37,29 @@ class EmployeeSerializer(serializers.ModelSerializer):
     class Meta:
         model = Employee
         fields = ['id', 'name', 'nif', 'address', 'email', 'phone', 'worksAtCompany', 'timeCards']
-class ManagerSerializer(serializers.ModelSerializer):
+
+
+class UserSerializer(serializers.ModelSerializer):
+    employee = EmployeeSerializer(read_only=True)
 
     class Meta:
-        model = Employee
+        model = User
+        fields = ['id', 'username', 'email', 'password', 'employee']
+
+
+class ManagerSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Manager
         fields = ['employee', 'company']
 
 
 class CompanySerializer(serializers.ModelSerializer):
-    #employees = EmployeeSerializer(many=True, read_only=True)
-    #manager = ManagerSerializer(many=True, read_only=True)
+    # employees = EmployeeSerializer(many=True, read_only=True)
+    # manager = ManagerSerializer(many=True, read_only=True)
 
     class Meta:
         model = Company
-        fields = ['id','name', 'nif', 'address','email','phone']
+        fields = ['id', 'name', 'nif', 'address', 'email', 'phone']
 
 
 class EmployeeTimeCardSerializer(serializers.ModelSerializer):
@@ -56,4 +68,3 @@ class EmployeeTimeCardSerializer(serializers.ModelSerializer):
     class Meta:
         model = Employee
         fields = ['id', 'name', 'nif', 'address', 'email', 'phone', 'worksAtCompany', 'timeCards']
-

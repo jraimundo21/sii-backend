@@ -12,7 +12,7 @@ class Employee(models.Model):
     email = models.EmailField(max_length=100)
     phone = models.CharField(max_length=20)
     worksAtCompany = models.ForeignKey('Company', on_delete=models.DO_NOTHING)
-    user = models.ForeignKey(settings.AUTH_USER_MODEL,on_delete=models.CASCADE)
+    user = models.OneToOneField(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, default=None)
 
 
 class Company(models.Model):

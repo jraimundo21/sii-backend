@@ -3,35 +3,48 @@ from django.shortcuts import render, HttpResponse, Http404, get_object_or_404, \
 
 from rest_framework.views import APIView, Response, status
 
-from .models import Employee, TimeCard, CheckIn, Company, Workplace,CheckOut
-from .serializers import EmployeeSerializer, TimeCardSerializer, CheckInSerializer,CheckOutSerializer, CompanySerializer, WorkplaceSerializer
+#from rest_framework.authentication import TokenAuthentication
+from rest_framework import permissions
+from rest_framework.authtoken.serializers import AuthTokenSerializer
+
+# Auth
+from django.contrib.auth import logout, login
+from django.contrib.auth.models import User
+from .models import Employee, TimeCard, CheckIn, Company, Workplace, CheckOut
+from .serializers import EmployeeSerializer, TimeCardSerializer, CheckInSerializer, \
+    CheckOutSerializer, CompanySerializer, WorkplaceSerializer, UserSerializer
 from django.contrib.auth.decorators import login_required
-from django.contrib.auth import authenticate, login, logout
-from .forms import EmployeeForm, CheckinForm, WorkplaceForm,CheckOutForm, CompanyForm
+
+
+from .forms import EmployeeForm, CheckinForm, WorkplaceForm, CheckOutForm, CompanyForm
 from django.contrib import messages
 
 
-#=======App  ======
-#_______Login
+# =======App  ======
+# _______Login
 
 def logoutUser(request):
-     logout(request)
-     return redirect('login')
+    logout(request)
+    return redirect('login')
 
 
-#_________________________________________________________________Companies
+# _________________________________________________________________Companies
 @login_required(login_url='login')
 def index(request):
-    #employee =Employee.objects.get(user= request.user.id )
-    #if(request.user.id==
-    #company = Company.objects.get(id=pk)
+    # employee =Employee.objects.get(user= request.user.id )
+    # if(request.user.id==
+    # company = Company.objects.get(id=pk)
     template_name = 'app/index.html'
     return render(request, template_name)
+
+
 @login_required(login_url='login')
 def listCompany(request):
-    companys = Company.objects.all()
+    companies = Company.objects.all()
     template_name = 'app/company.html'
-    return render(request, template_name, {'companys': companys})
+    return render(request, template_name, {'companys': companies})
+
+
 @login_required(login_url='login')
 def addCompany(request):
     form = CompanyForm(request.POST or None)
@@ -39,12 +52,13 @@ def addCompany(request):
     if request.method == 'POST':
         if form.is_valid():
             form.save()
-            messages.success(request, 'New comany ' + form.fields.name)
+            messages.success(request, 'New comany ')
             return redirect('list_company')
     return render(request, template_name, {'form': form})
 
+
 @login_required(login_url='login')
-def editCompany(request,pk):
+def editCompany(request, pk):
     company = Company.objects.get(id=pk)
     form = CompanyForm(instance=company)
     template_name = 'app/form.html'
@@ -52,15 +66,18 @@ def editCompany(request,pk):
         form = CompanyForm(request.POST, instance=company)
         if form.is_valid():
             form.save()
-            messages.success(request, 'Edited comany ' + form.fields.name)
+            messages.success(request, 'Edited comany ')
             return redirect('list_company')
     return render(request, template_name, {'form': form, 'pageName': 'Workplace'})
 
+
 @login_required(login_url='login')
-def deleteCompany(request,pk):
+def deleteCompany(request, pk):
     company = get_object_or_404(Company, pk=pk)
     company.delete()
+    messages.success(request, 'deleted  comany ')
     return redirect('list_company')
+
 
 # -------------------------------------- Employee
 @login_required(login_url='login')
@@ -69,9 +86,9 @@ def listEmployee(request):
     template_name = 'app/employee.html'
     return render(request, template_name, {'employees': employees})
 
+
 @login_required(login_url='login')
 def addEmployee(request):
-
     form = EmployeeForm(request.POST or None)
     template_name = 'app/form.html'
     pageName = 'Adcionar Employee'
@@ -80,26 +97,30 @@ def addEmployee(request):
             form.save()
             messages.success(request, 'New Employee')
             return redirect('list_employee')
-    return render(request, template_name, {'form': form,'pageName': pageName })
+    return render(request, template_name, {'form': form, 'pageName': pageName})
+
 
 @login_required(login_url='login')
-def editEmployee(request,pk):
+def editEmployee(request, pk):
     employee = Employee.objects.get(id=pk)
     form = EmployeeForm(instance=employee)
     template_name = 'app/form.html'
-    pageName = 'Editar Employee'
+    pageName = 'Employee Edited '
     if request.method == 'POST':
         form = EmployeeForm(request.POST, instance=employee)
         if form.is_valid():
             form.save()
             return redirect('list_employee')
-    return render(request, template_name, {'form': form , 'pageName': pageName})
+    return render(request, template_name, {'form': form, 'pageName': pageName})
+
 
 @login_required(login_url='login')
-def deleteEmployee(request,pk):
+def deleteEmployee(request, pk):
     employee = get_object_or_404(Employee, pk=pk)
     employee.delete()
+    messages.success(request, 'Employee Deleted ')
     return redirect('list_employee')
+
 
 # -------------------------------------- Workplace
 @login_required(login_url='login')
@@ -107,6 +128,7 @@ def listWorkplace(request):
     workplaces = Workplace.objects.all()
     template_name = 'app/workplace.html'
     return render(request, template_name, {'workplaces': workplaces})
+
 
 @login_required(login_url='login')
 def addWorkplace(request):
@@ -116,27 +138,34 @@ def addWorkplace(request):
     if request.method == 'POST':
         if form.is_valid():
             form.save()
+            messages.success(request, 'New Workplace ')
             return redirect('list_workplace')
     return render(request, template_name, {'form': form, 'pageName': pageName})
 
+
 @login_required(login_url='login')
-def editWorkplace(request,pk):
+def editWorkplace(request, pk):
     workplace = Workplace.objects.get(id=pk)
     form = WorkplaceForm(instance=workplace)
     template_name = 'app/form.html'
-    pageName = 'Editar Workpalce'
+    pageName = 'Editar Workplace'
     if request.method == 'POST':
         form = WorkplaceForm(request.POST, instance=workplace)
         if form.is_valid():
             form.save()
+            messages.success(request, 'Workplace Edited')
             return redirect('list_workplace')
     return render(request, template_name, {'form': form, 'pageName': pageName})
 
+
 @login_required(login_url='login')
-def deleteWorkplace(request,pk):
+def deleteWorkplace(request, pk):
     workplace = get_object_or_404(Workplace, pk=pk)
     workplace.delete()
+    messages.success(request, 'Workplace deleted')
     return redirect('list_workplace')
+
+
 # -------------------------------------- Checkin
 
 @login_required(login_url='login')
@@ -144,6 +173,7 @@ def listCheckin(request):
     checkList = CheckIn.objects.all()
     template_name = 'app/checkin.html'
     return render(request, template_name, {'checkList': checkList})
+
 
 @login_required(login_url='login')
 def addCheckin(request):
@@ -153,11 +183,13 @@ def addCheckin(request):
     if request.method == 'POST':
         if form.is_valid():
             form.save()
+            messages.success(request, 'New Check-in ')
             return redirect('list_checkin')
     return render(request, template_name, {'form': form, 'pageName': pageName})
 
+
 @login_required(login_url='login')
-def editCheckin(request,pk):
+def editCheckin(request, pk):
     checkin = CheckIn.objects.get(id=pk)
     form = CheckinForm(instance=checkin)
     template_name = 'app/form.html'
@@ -166,14 +198,17 @@ def editCheckin(request,pk):
         form = CheckinForm(request.POST, instance=checkin)
         if form.is_valid():
             form.save()
+            messages.success(request, 'Check-in Edited')
             return redirect('list_checkin')
     return render(request, template_name, {'form': form, 'pageName': pageName})
 
+
 @login_required(login_url='login')
-def deleteCheckin(request,pk):
+def deleteCheckin(request, pk):
     checkin = get_object_or_404(CheckIn, pk=pk)
     checkin.delete()
     return redirect('list_checkin')
+
 
 # -------------------------------------- Checkin
 
@@ -183,6 +218,7 @@ def listCheckout(request):
     template_name = 'app/checkout.html'
     return render(request, template_name, {'checklist': checklist})
 
+
 @login_required(login_url='login')
 def addCheckout(request):
     form = CheckOutForm(request.POST or None)
@@ -191,11 +227,13 @@ def addCheckout(request):
     if request.method == 'POST':
         if form.is_valid():
             form.save()
+            messages.success(request, 'New Check-out')
             return redirect('list_checkOut')
     return render(request, template_name, {'form': form, 'pageName': pageName})
 
+
 @login_required(login_url='login')
-def editCheckout(request,pk):
+def editCheckout(request, pk):
     checkOut = CheckOut.objects.get(id=pk)
     form = CheckOutForm(instance=checkOut)
     template_name = 'app/form.html'
@@ -204,28 +242,54 @@ def editCheckout(request,pk):
         form = CheckOutForm(request.POST, instance=checkOut)
         if form.is_valid():
             form.save()
+            messages.success(request, 'Check-outEdited')
             return redirect('list_checkOut')
     return render(request, template_name, {'form': form, 'pageName': pageName})
+
+
 @login_required(login_url='login')
-def deleteCheckout(request,pk):
+def deleteCheckout(request, pk):
     checkOut = get_object_or_404(CheckOut, pk=pk)
     checkOut.delete()
+    messages.success(request, 'Check-out deleted ')
     return redirect('list_checkOut')
+
 
 # -------------------------------------- TimeCard
 
 
-
-
 # === API ===
+class LoginApi(APIView):
+    permission_classes = (permissions.AllowAny,)
+
+    def post(self, request, format=None):
+        serializer = AuthTokenSerializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+        user = serializer.validated_data['user']
+        login(request, user)
+        return Response(serializer.data)
+
+class RegisterApi(APIView):
+    permission_classes = (permissions.AllowAny,)
+
+    def post(self, request):
+        serializer = UserSerializer(data=request.data)
+        if serializer.is_valid():
+            user = serializer.save()
+            user.set_password(user.password)
+            user.save()
+            login(request, user)
+            return Response(serializer.data, status=status.HTTP_201_CREATED)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 # -------------------------------------- Company
 
 class CompanyList(APIView):
     """List all Companies"""
 
+    # authentication_classes = (TokenAuthentication,)
     def get(self, request):
         companies = Company.objects.all()
-        serializer = CompanySerializer(companies)
+        serializer = CompanySerializer(companies, many=True)
         return Response(serializer.data)
 
     def post(self, request):
@@ -235,16 +299,17 @@ class CompanyList(APIView):
             return Response(serializer.data, status=status.HTTP_201_CREATED)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
+from django.contrib.auth.hashers import make_password
 class CompanyDetail(APIView):
     """Lists a company"""
 
     def get(self, request, pk):
-        company = get_object_or_404(Employee, pk=pk)
+        company = get_object_or_404(Company, pk=pk)
         serializer = CompanySerializer(company)
         return Response(serializer.data)
 
     def put(self, request, pk):
-        company = get_object_or_404(Employee, pk=pk)
+        company = get_object_or_404(Company, pk=pk)
         serializer = CompanySerializer(company, data=request.data)
         if serializer.is_valid():
             serializer.save()
@@ -256,6 +321,41 @@ class CompanyDetail(APIView):
         if company:
             company.delete()
         return Response({})
+
+
+# --------------------------------------- Users
+class UserList(APIView):
+    """List all users."""
+
+    def get(self, request):
+        users = User.objects.all()
+        serializer = UserSerializer(users, many=True)
+        return Response(serializer.data)
+
+
+class UserDetail(APIView):
+    """ Users Details."""
+    permission_classes = (permissions.IsAuthenticated,)
+    def get(self, request, pk):
+        user = get_object_or_404(Employee, pk=pk)
+        serializer = UserSerializer(user, many=False)
+        return Response(serializer.data)
+
+    def put(self, request, pk):
+        user = get_object_or_404(Employee, pk=pk)
+        serializer = UserSerializer(user, data=request.data)
+        if serializer.is_valid():
+            serializer.save()
+            return Response(serializer.data)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+    def delete(self, request, pk):
+        user = get_object_or_404(User, pk=pk)
+        if user:
+            user.delete()
+        return Response({})
+
+
 # -------------------------------------- Employee
 
 class EmployeeList(APIView):
@@ -296,6 +396,7 @@ class EmployeeDetail(APIView):
             employee.delete()
         return Response({})
 
+
 # -------------------------------------- Workplace
 
 class WorkplaceList(APIView):
@@ -303,7 +404,7 @@ class WorkplaceList(APIView):
 
     def get(self, request):
         workplaces = Workplace.objects.all()
-        serializer = WorkplaceSerializer(workplaces)
+        serializer = WorkplaceSerializer(workplaces, many=True)
         return Response(serializer.data)
 
     def post(self, request):
@@ -335,6 +436,8 @@ class WorkplaceDetail(APIView):
         if workplace:
             workplace.delete()
         return Response({})
+
+
 # -------------------------------------- Checkin
 
 class CheckInList(APIView):
@@ -352,6 +455,7 @@ class CheckInList(APIView):
             return Response(serializer.data, status=status.HTTP_201_CREATED)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
+
 class CheckInDetail(APIView):
     """Lists a CheckIn."""
 
@@ -361,8 +465,8 @@ class CheckInDetail(APIView):
         return Response(serializer.data)
 
     def put(self, request, pk):
-        checkin = get_object_or_404(Workplace, pk=pk)
-        serializer = WorkplaceSerializer(checkin, data=request.data)
+        checkin = get_object_or_404(CheckIn, pk=pk)
+        serializer = CheckInSerializer(checkin, data=request.data)
         if serializer.is_valid():
             serializer.save()
             return Response(serializer.data)
@@ -373,6 +477,8 @@ class CheckInDetail(APIView):
         if checkin:
             checkin.delete()
         return Response({})
+
+
 # -------------------------------------- Checkin
 
 class CheckOutList(APIView):
@@ -389,6 +495,7 @@ class CheckOutList(APIView):
             serializer.save()
             return Response(serializer.data, status=status.HTTP_201_CREATED)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
 
 class CheckOutDetail(APIView):
     """Lists a CheckOut."""
@@ -411,6 +518,7 @@ class CheckOutDetail(APIView):
         if checkout:
             checkout.delete()
         return Response({})
+
 
 # -------------------------------------- TimeCard
 
