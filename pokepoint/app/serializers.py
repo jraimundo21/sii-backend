@@ -1,7 +1,7 @@
 from rest_framework import serializers
 
 from .models import Employee, Company, Workplace, TimeCard, Manager, CheckIn, CheckOut
-from django.contrib.auth.models import User
+from django.contrib.auth.models import User, Group
 from django.contrib.auth.hashers import make_password
 
 class CheckInSerializer(serializers.ModelSerializer):
@@ -38,19 +38,25 @@ class EmployeeSerializer(serializers.ModelSerializer):
         model = Employee
         fields = ['id', 'name', 'nif', 'address', 'email', 'phone', 'worksAtCompany', 'timeCards']
 
+class GroupSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Group
+        fields = ('name',)
+
 
 class UserSerializer(serializers.ModelSerializer):
     employee = EmployeeSerializer(read_only=True)
+    groups = GroupSerializer(many=True)
 
     class Meta:
         model = User
-        fields = ['id', 'username', 'email', 'password', 'employee']
+        fields = ['id', 'username', 'email', 'employee', 'groups']
 
 
 class ManagerSerializer(serializers.ModelSerializer):
     class Meta:
         model = Manager
-        fields = ['employee', 'company']
+        fields = ['employeeManager', 'companyManager']
 
 
 class CompanySerializer(serializers.ModelSerializer):

@@ -33,10 +33,10 @@ class TimeCardForm(forms.ModelForm):
         fields = ['id', 'employee']
 
 
-class ManagerForm(forms.ModelForm):
+'''class ManagerForm(forms.ModelForm):
     class Meta:
         model = Manager
-        fields = ['employee', 'company']
+        fields = [' employeeManager', 'companyManager']'''
 
 
 class CompanyForm(forms.ModelForm):

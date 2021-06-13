@@ -24,8 +24,8 @@ class Company(models.Model):
 
 
 class Manager(models.Model):
-    employee = models.ForeignKey(Employee, on_delete=models.DO_NOTHING,related_name='manager')
-    company = models.ForeignKey(Company, on_delete=models.CASCADE,related_name='manager')
+    employeeManager = models.ForeignKey(Employee, on_delete=models.DO_NOTHING, related_name='manager')
+    companyManager = models.ForeignKey(Company, on_delete=models.CASCADE, related_name='manager')
 
 
 class Workplace(models.Model):

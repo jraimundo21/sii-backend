@@ -1,9 +1,6 @@
-from django.shortcuts import render, HttpResponse, Http404, get_object_or_404, \
-    HttpResponseRedirect, reverse, redirect
-
+from django.shortcuts import render, get_object_or_404, \
+    redirect
 from rest_framework.views import APIView, Response, status
-
-#from rest_framework.authentication import TokenAuthentication
 from rest_framework import permissions
 from rest_framework.authtoken.serializers import AuthTokenSerializer
 
@@ -14,8 +11,6 @@ from .models import Employee, TimeCard, CheckIn, Company, Workplace, CheckOut
 from .serializers import EmployeeSerializer, TimeCardSerializer, CheckInSerializer, \
     CheckOutSerializer, CompanySerializer, WorkplaceSerializer, UserSerializer
 from django.contrib.auth.decorators import login_required
-
-
 from .forms import EmployeeForm, CheckinForm, WorkplaceForm, CheckOutForm, CompanyForm
 from django.contrib import messages
 
@@ -148,7 +143,7 @@ def editWorkplace(request, pk):
     workplace = Workplace.objects.get(id=pk)
     form = WorkplaceForm(instance=workplace)
     template_name = 'app/form.html'
-    pageName = 'Editar Workplace'
+    pageName = 'Editor Workplace'
     if request.method == 'POST':
         form = WorkplaceForm(request.POST, instance=workplace)
         if form.is_valid():
@@ -256,18 +251,17 @@ def deleteCheckout(request, pk):
 
 
 # -------------------------------------- TimeCard
-
-
 # === API ===
 class LoginApi(APIView):
     permission_classes = (permissions.AllowAny,)
 
-    def post(self, request, format=None):
+    def post(self, request):
         serializer = AuthTokenSerializer(data=request.data)
         serializer.is_valid(raise_exception=True)
         user = serializer.validated_data['user']
         login(request, user)
         return Response(serializer.data)
+
 
 class RegisterApi(APIView):
     permission_classes = (permissions.AllowAny,)
@@ -281,46 +275,69 @@ class RegisterApi(APIView):
             login(request, user)
             return Response(serializer.data, status=status.HTTP_201_CREATED)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+
 # -------------------------------------- Company
 
 class CompanyList(APIView):
     """List all Companies"""
 
-    # authentication_classes = (TokenAuthentication,)
     def get(self, request):
-        companies = Company.objects.all()
-        serializer = CompanySerializer(companies, many=True)
-        return Response(serializer.data)
+        if request.user.is_superuser:
+            companies = Company.objects.all()
+            serializer = CompanySerializer(companies, many=True)
+            return Response(serializer.data)
+        return Response(status.HTTP_401_UNAUTHORIZED)
 
     def post(self, request):
-        serializer = CompanySerializer(data=request.data)
-        if serializer.is_valid():
-            serializer.save()
-            return Response(serializer.data, status=status.HTTP_201_CREATED)
-        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+        if request.user.has_perm('app.add_timecard'):
+            serializer = CompanySerializer(data=request.data)
+            if serializer.is_valid():
+                serializer.save()
+                return Response(serializer.data, status=status.HTTP_201_CREATED)
+            return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+        return Response(status.HTTP_401_UNAUTHORIZED)
 
-from django.contrib.auth.hashers import make_password
+
 class CompanyDetail(APIView):
     """Lists a company"""
 
     def get(self, request, pk):
-        company = get_object_or_404(Company, pk=pk)
-        serializer = CompanySerializer(company)
-        return Response(serializer.data)
+        userCompany = request.user.employee.worksAtCompany.id
+
+        if request.user.is_superuser or userCompany == pk:
+            if request.user.has_perm('app.view_company'):
+                company = get_object_or_404(Company, pk=pk)
+                serializer = CompanySerializer(company)
+                return Response(serializer.data)
+            return Response(status.HTTP_401_UNAUTHORIZED)
+        return Response(status.HTTP_401_UNAUTHORIZED)
 
     def put(self, request, pk):
-        company = get_object_or_404(Company, pk=pk)
-        serializer = CompanySerializer(company, data=request.data)
-        if serializer.is_valid():
-            serializer.save()
-            return Response(serializer.data)
-        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+        userCompany = request.user.employee.worksAtCompany.id
+
+        if request.user.is_superuser or userCompany == pk:
+            if request.user.has_perm('app.change_company'):
+                company = get_object_or_404(Company, pk=pk)
+                serializer = CompanySerializer(company, data=request.data)
+                if serializer.is_valid():
+                    serializer.save()
+                    return Response(serializer.data)
+                return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+            return Response(status.HTTP_401_UNAUTHORIZED)
+        return Response(status.HTTP_401_UNAUTHORIZED)
 
     def delete(self, request, pk):
-        company = get_object_or_404(Company, pk=pk)
-        if company:
-            company.delete()
-        return Response({})
+        userCompany = request.user.employee.worksAtCompany.id
+
+        if request.user.is_superuser or userCompany == pk:
+            if request.user.has_perm('app.delete_company'):
+                company = get_object_or_404(Company, pk=pk)
+                if company:
+                    company.delete()
+                return Response({})
+            return Response(status.HTTP_401_UNAUTHORIZED)
+        return Response(status.HTTP_401_UNAUTHORIZED)
 
 
 # --------------------------------------- Users
@@ -328,32 +345,60 @@ class UserList(APIView):
     """List all users."""
 
     def get(self, request):
-        users = User.objects.all()
-        serializer = UserSerializer(users, many=True)
-        return Response(serializer.data)
+        userCompany = request.user.employee.worksAtCompany.id
+
+        if request.user.has_perm('auth.view_user'):
+            if request.user.is_superuser:
+                users = User.objects.all()
+            else:
+                users = User.objects.filter(employee__worksAtCompany=userCompany)
+            serializer = UserSerializer(users, many=True)
+            return Response(serializer.data)
+        return Response(status.HTTP_401_UNAUTHORIZED)
 
 
 class UserDetail(APIView):
     """ Users Details."""
-    permission_classes = (permissions.IsAuthenticated,)
+
     def get(self, request, pk):
-        user = get_object_or_404(Employee, pk=pk)
-        serializer = UserSerializer(user, many=False)
-        return Response(serializer.data)
+        userCompany = request.user.employee.worksAtCompany.id
+        if request.user.has_perm('auth.view_user'):
+            if request.user.is_superuser:
+                user = get_object_or_404(User, pk=pk)
+            else:
+                user = User.objects.filter(employee__worksAtCompany=userCompany, pk=pk)
+
+            serializer = UserSerializer(user, many=False)
+            return Response(serializer.data)
+        return Response(status.HTTP_401_UNAUTHORIZED)
 
     def put(self, request, pk):
-        user = get_object_or_404(Employee, pk=pk)
-        serializer = UserSerializer(user, data=request.data)
-        if serializer.is_valid():
-            serializer.save()
-            return Response(serializer.data)
-        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+        userCompany = request.user.employee.worksAtCompany.id
+
+        if request.user.has_perm('app.change_user'):
+            if request.user.is_superuser:
+                user = get_object_or_404(User, pk=pk)
+            else:
+                user = User.objects.filter(employee__worksAtCompany=userCompany, pk=pk)
+            serializer = UserSerializer(user, data=request.data)
+            if serializer.is_valid():
+                serializer.save()
+                return Response(serializer.data)
+            return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+        return Response(status.HTTP_401_UNAUTHORIZED)
 
     def delete(self, request, pk):
-        user = get_object_or_404(User, pk=pk)
-        if user:
-            user.delete()
-        return Response({})
+        userCompany = request.user.employee.worksAtCompany.id
+
+        if request.user.has_perm('app.delete_user'):
+            if request.user.is_superuser:
+                user = get_object_or_404(User, pk=pk)
+            else:
+                user = User.objects.filter(employee__worksAtCompany=userCompany, pk=pk)
+            if user:
+                user.delete()
+            return Response({})
+        return Response(status.HTTP_401_UNAUTHORIZED)
 
 
 # -------------------------------------- Employee
@@ -362,39 +407,69 @@ class EmployeeList(APIView):
     """List all employee."""
 
     def get(self, request):
-        employees = Employee.objects.all()
-        serializer = EmployeeSerializer(employees, many=True)
-        return Response(serializer.data)
+        userCompany = request.user.employee.worksAtCompany.id
+
+        if request.user.has_perm('app.view_employee'):
+            if request.user.is_superuser:
+                employees = Employee.objects.all()
+            else:
+                employees = Employee.objects.filter(worksAtCompany=userCompany)
+            serializer = EmployeeSerializer(employees, many=True)
+            return Response(serializer.data)
+        return Response(status.HTTP_401_UNAUTHORIZED)
 
     def post(self, request):
-        serializer = EmployeeSerializer(data=request.data)
-        if serializer.is_valid():
-            serializer.save()
-            return Response(serializer.data, status=status.HTTP_201_CREATED)
-        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+        if request.user.has_perm('app.change_employee'):
+            serializer = EmployeeSerializer(data=request.data)
+            if serializer.is_valid():
+                serializer.save()
+                return Response(serializer.data, status=status.HTTP_201_CREATED)
+            return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+        return Response(status.HTTP_401_UNAUTHORIZED)
 
 
 class EmployeeDetail(APIView):
     """Lists a employee."""
 
     def get(self, request, pk):
-        employee = get_object_or_404(Employee, pk=pk)
-        serializer = EmployeeSerializer(employee, many=False)
-        return Response(serializer.data)
+        userCompany = request.user.employee.worksAtCompany.id
+
+        if request.user.has_perm('app.view_employee'):
+            if request.user.is_superuser:
+                employee = get_object_or_404(Employee, pk=pk)
+            else:
+                employee = Employee.objects.filter(worksAtCompany=userCompany, pk=pk)
+            serializer = EmployeeSerializer(employee, many=False)
+            return Response(serializer.data)
+        return Response(status.HTTP_401_UNAUTHORIZED)
 
     def put(self, request, pk):
-        employee = get_object_or_404(Employee, pk=pk)
-        serializer = EmployeeSerializer(employee, data=request.data)
-        if serializer.is_valid():
-            serializer.save()
-            return Response(serializer.data)
-        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+        userCompany = request.user.employee.worksAtCompany.id
+
+        if request.user.has_perm('app.change_employee'):
+            if request.user.is_superuser:
+                employee = get_object_or_404(Employee, pk=pk)
+            else:
+                employee = Employee.objects.filter(worksAtCompany=userCompany, pk=pk)
+            serializer = EmployeeSerializer(employee, data=request.data)
+            if serializer.is_valid():
+                serializer.save()
+                return Response(serializer.data)
+            return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+        return Response(status.HTTP_401_UNAUTHORIZED)
 
     def delete(self, request, pk):
-        employee = get_object_or_404(Employee, pk=pk)
-        if employee:
-            employee.delete()
-        return Response({})
+        userCompany = request.user.employee.worksAtCompany.id
+
+        if request.user.has_perm('app.delete_employee'):
+            if request.user.is_superuser:
+                employee = get_object_or_404(Employee, pk=pk)
+            else:
+                employee = Employee.objects.filter(worksAtCompany=userCompany, pk=pk)
+            if employee:
+                employee.delete()
+            return Response({})
+        return Response(status.HTTP_401_UNAUTHORIZED)
 
 
 # -------------------------------------- Workplace
@@ -403,39 +478,69 @@ class WorkplaceList(APIView):
     """List all workplace."""
 
     def get(self, request):
-        workplaces = Workplace.objects.all()
-        serializer = WorkplaceSerializer(workplaces, many=True)
-        return Response(serializer.data)
+        userCompany = request.user.employee.worksAtCompany.id
+
+        if request.user.has_perm('app.view_workplacee'):
+            if request.user.is_superuser:
+                workplaces = Workplace.objects.all()
+            else:
+                workplaces = Workplace.objects.filter(company=userCompany)
+            serializer = WorkplaceSerializer(workplaces, many=True)
+            return Response(serializer.data)
+        return Response(status.HTTP_401_UNAUTHORIZED)
 
     def post(self, request):
-        serializer = WorkplaceSerializer(data=request.data)
-        if serializer.is_valid():
-            serializer.save()
-            return Response(serializer.data, status=status.HTTP_201_CREATED)
-        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+        if request.user.has_perm('app.add_workplace'):
+            serializer = WorkplaceSerializer(data=request.data)
+            if serializer.is_valid():
+                serializer.save()
+                return Response(serializer.data, status=status.HTTP_201_CREATED)
+            return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+        return Response(status.HTTP_401_UNAUTHORIZED)
 
 
 class WorkplaceDetail(APIView):
     """Lists a Workplace."""
 
     def get(self, request, pk):
-        workplace = get_object_or_404(Workplace, pk=pk)
-        serializer = WorkplaceSerializer(workplace)
-        return Response(serializer.data)
+        userCompany = request.user.employee.worksAtCompany.id
+
+        if request.user.has_perm('app.vies_workplace'):
+            if request.user.is_superuser:
+                workplace = get_object_or_404(Workplace, pk=pk)
+            else:
+                workplace = Workplace.objects.filter(company=userCompany, pk=pk)
+            serializer = WorkplaceSerializer(workplace)
+            return Response(serializer.data)
+        return Response(status.HTTP_401_UNAUTHORIZED)
 
     def put(self, request, pk):
-        workplace = get_object_or_404(Workplace, pk=pk)
-        serializer = WorkplaceSerializer(workplace, data=request.data)
-        if serializer.is_valid():
-            serializer.save()
-            return Response(serializer.data)
-        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+        userCompany = request.user.employee.worksAtCompany.id
+
+        if request.user.has_perm('app.change_workplace'):
+            if request.user.is_superuser:
+                workplace = get_object_or_404(Workplace, pk=pk)
+            else:
+                workplace = Workplace.objects.filter(company=userCompany, pk=pk)
+            serializer = WorkplaceSerializer(workplace, data=request.data)
+            if serializer.is_valid():
+                serializer.save()
+                return Response(serializer.data)
+            return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+        return Response(status.HTTP_401_UNAUTHORIZED)
 
     def delete(self, request, pk):
-        workplace = get_object_or_404(Workplace, pk=pk)
-        if workplace:
-            workplace.delete()
-        return Response({})
+        userCompany = request.user.employee.worksAtCompany.id
+
+        if request.user.has_perm('app.delete_workplace'):
+            if request.user.is_superuser:
+                workplace = get_object_or_404(Workplace, pk=pk)
+            else:
+                workplace = Workplace.objects.filter(company=userCompany, pk=pk)
+            if workplace:
+                workplace.delete()
+            return Response({})
+        return Response(status.HTTP_401_UNAUTHORIZED)
 
 
 # -------------------------------------- Checkin
@@ -444,39 +549,71 @@ class CheckInList(APIView):
     """List all checkin."""
 
     def get(self, request):
-        checkinList = CheckIn.objects.all()
-        serializer = CheckInSerializer(checkinList, many=True)
-        return Response(serializer.data)
+        userCompany = request.user.employee.worksAtCompany.id
+
+        if request.user.has_perm('app.view_checkin'):
+            if request.user.is_superuser:
+                checkinList = CheckIn.objects.all()
+            else:
+                checkinList = CheckIn.objects.filter(workplace__company=userCompany)
+            serializer = CheckInSerializer(checkinList, many=True)
+            return Response(serializer.data)
+        return Response(status.HTTP_401_UNAUTHORIZED)
 
     def post(self, request):
-        serializer = CheckInSerializer(data=request.data)
-        if serializer.is_valid():
-            serializer.save()
-            return Response(serializer.data, status=status.HTTP_201_CREATED)
-        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+        if request.user.has_perm('app.add_checkin'):
+            serializer = CheckInSerializer(data=request.data)
+            if serializer.is_valid():
+                serializer.save()
+                return Response(serializer.data, status=status.HTTP_201_CREATED)
+            return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+        return Response(status.HTTP_401_UNAUTHORIZED)
 
 
 class CheckInDetail(APIView):
     """Lists a CheckIn."""
 
     def get(self, request, pk):
-        checkin = get_object_or_404(CheckIn, pk=pk)
-        serializer = CheckInSerializer(checkin)
-        return Response(serializer.data)
+        userCompany = request.user.employee.worksAtCompany.id
+
+        if request.user.has_perm('app.view_checkin'):
+            if request.user.is_superuser:
+                checkin = get_object_or_404(CheckIn, pk=pk)
+            else:
+                checkin = CheckIn.objects.filter(workplace__company=userCompany, pk=pk)
+            checkin = get_object_or_404(CheckIn, pk=pk)
+            serializer = CheckInSerializer(checkin)
+            return Response(serializer.data)
+        return Response(status.HTTP_401_UNAUTHORIZED)
 
     def put(self, request, pk):
-        checkin = get_object_or_404(CheckIn, pk=pk)
-        serializer = CheckInSerializer(checkin, data=request.data)
-        if serializer.is_valid():
-            serializer.save()
-            return Response(serializer.data)
-        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+        userCompany = request.user.employee.worksAtCompany.id
+
+        if request.user.has_perm('app.view_checkin'):
+
+            if request.user.is_superuser:
+                checkin = get_object_or_404(CheckIn, pk=pk)
+            else:
+                checkin = CheckIn.objects.filter(workplace__company=userCompany, pk=pk)
+            serializer = CheckInSerializer(checkin, data=request.data)
+            if serializer.is_valid():
+                serializer.save()
+                return Response(serializer.data)
+            return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+        return Response(status.HTTP_401_UNAUTHORIZED)
 
     def delete(self, request, pk):
-        checkin = get_object_or_404(CheckIn, pk=pk)
-        if checkin:
-            checkin.delete()
-        return Response({})
+        userCompany = request.user.employee.worksAtCompany.id
+
+        if request.user.has_perm('app.delete_checkin'):
+            if request.user.is_superuser:
+                checkin = get_object_or_404(CheckIn, pk=pk)
+            else:
+                checkin = CheckIn.objects.filter(workplace__company=userCompany, pk=pk)
+            if checkin:
+                checkin.delete()
+            return Response({})
+        return Response(status.HTTP_401_UNAUTHORIZED)
 
 
 # -------------------------------------- Checkin
@@ -485,39 +622,70 @@ class CheckOutList(APIView):
     """List all checkin."""
 
     def get(self, request):
-        checkoutList = CheckOut.objects.all()
-        serializer = CheckOutSerializer(checkoutList, many=True)
-        return Response(serializer.data)
+        userCompany = request.user.employee.worksAtCompany.id
+
+        if request.user.has_perm('app.delete_checkout'):
+            if request.user.is_superuser:
+                checkoutList = CheckOut.objects.all()
+            else:
+                checkoutList = CheckOut.objects.filter(workplace__company=userCompany)
+            serializer = CheckOutSerializer(checkoutList, many=True)
+            return Response(serializer.data)
+        return Response(status.HTTP_401_UNAUTHORIZED)
 
     def post(self, request):
-        serializer = CheckOutSerializer(data=request.data)
-        if serializer.is_valid():
-            serializer.save()
-            return Response(serializer.data, status=status.HTTP_201_CREATED)
-        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+        if request.user.has_perm('app.delete_checkout'):
+            serializer = CheckOutSerializer(data=request.data)
+            if serializer.is_valid():
+                serializer.save()
+                return Response(serializer.data, status=status.HTTP_201_CREATED)
+            return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+        return Response(status.HTTP_401_UNAUTHORIZED)
 
 
 class CheckOutDetail(APIView):
     """Lists a CheckOut."""
 
     def get(self, request, pk):
-        checkout = get_object_or_404(CheckOut, pk=pk)
-        serializer = CheckOutSerializer(checkout)
-        return Response(serializer.data)
+        userCompany = request.user.employee.worksAtCompany.id
+
+        if request.user.has_perm('app.view_checkout'):
+            if request.user.is_superuser:
+                checkout = get_object_or_404(CheckOut, pk=pk)
+            else:
+                checkout = Workplace.objects.filter(workplace__company=userCompany, pk=pk)
+            serializer = CheckOutSerializer(checkout)
+            return Response(serializer.data)
+        return Response(status.HTTP_401_UNAUTHORIZED)
 
     def put(self, request, pk):
-        checkout = get_object_or_404(CheckOut, pk=pk)
-        serializer = CheckOutSerializer(checkout, data=request.data)
-        if serializer.is_valid():
-            serializer.save()
-            return Response(serializer.data)
-        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+        userCompany = request.user.employee.worksAtCompany.id
+
+        if request.user.has_perm('app.change_checkout'):
+            if request.user.is_superuser:
+                checkout = get_object_or_404(CheckOut, pk=pk)
+            else:
+                checkout = CheckOut.objects.filter(workplace__company=userCompany, pk=pk)
+            serializer = CheckOutSerializer(checkout, data=request.data)
+            if serializer.is_valid():
+                serializer.save()
+                return Response(serializer.data)
+            return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+        return Response(status.HTTP_401_UNAUTHORIZED)
 
     def delete(self, request, pk):
-        checkout = get_object_or_404(CheckOut, pk=pk)
-        if checkout:
-            checkout.delete()
-        return Response({})
+        userCompany = request.user.employee.worksAtCompany.id
+
+        if request.user.has_perm('app.delete_checkout'):
+            if request.user.is_superuser:
+                checkout = get_object_or_404(CheckOut, pk=pk)
+            else:
+                checkout = CheckOut.objects.filter(workplace__company=userCompany, pk=pk)
+            if checkout:
+                checkout.delete()
+            return Response({})
+        return Response(status.HTTP_401_UNAUTHORIZED)
 
 
 # -------------------------------------- TimeCard
@@ -526,36 +694,67 @@ class TimeCardList(APIView):
     """List all timeCard."""
 
     def get(self, request):
-        timeCards = TimeCard.objects.all()
-        serializer = TimeCardSerializer(timeCards, many=True)
-        return Response(serializer.data)
+        userCompany = request.user.employee.worksAtCompany.id
+
+        if request.user.has_perm('app.view_timecard'):
+            if request.user.is_superuser:
+                timeCards = TimeCard.objects.all()
+            else:
+                timeCards = TimeCard.objects.filter(checkIn__workplace__company=userCompany)
+            serializer = TimeCardSerializer(timeCards, many=True)
+            return Response(serializer.data)
+        return Response(status.HTTP_401_UNAUTHORIZED)
 
     def post(self, request):
-        serializer = TimeCardSerializer(data=request.data)
-        if serializer.is_valid():
-            serializer.save()
-            return Response(serializer.data, status=status.HTTP_201_CREATED)
-        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+        if request.user.has_perm('app.add_timecard'):
+
+            serializer = TimeCardSerializer(data=request.data)
+            if serializer.is_valid():
+                serializer.save()
+                return Response(serializer.data, status=status.HTTP_201_CREATED)
+            return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+        return Response(status.HTTP_401_UNAUTHORIZED)
 
 
 class TimeCardDetail(APIView):
     """Lists a timeCard."""
 
     def get(self, request, pk):
-        timeCard = get_object_or_404(TimeCard, pk=pk)
-        serializer = TimeCardSerializer(timeCard, many=False)
-        return Response(serializer.data)
+        userCompany = request.user.employee.worksAtCompany.id
+        if request.user.has_perm('app.view_timecard'):
+
+            if request.user.is_superuser:
+                timecard = get_object_or_404(TimeCard, pk=pk)
+            else:
+                timecard = TimeCard.objects.filter(checkIn__workplace__company=userCompany, pk=pk)
+            serializer = TimeCardSerializer(timecard, many=False)
+            return Response(serializer.data)
+        return Response(status.HTTP_401_UNAUTHORIZED)
 
     def put(self, request, pk):
-        timeCard = get_object_or_404(TimeCard, pk=pk)
-        serializer = TimeCardSerializer(timeCard, data=request.data)
-        if serializer.is_valid():
-            serializer.save()
-            return Response(serializer.data)
-        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+        userCompany = request.user.employee.worksAtCompany.id
+
+        if request.user.has_perm('app.change_timecard'):
+            if request.user.is_superuser:
+                timecard = get_object_or_404(TimeCard, pk=pk)
+            else:
+                timecard = TimeCard.objects.filter(checkIn__workplace__company=userCompany, pk=pk)
+            serializer = TimeCardSerializer(timecard, data=request.data)
+            if serializer.is_valid():
+                serializer.save()
+                return Response(serializer.data)
+            return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+        return Response(status.HTTP_401_UNAUTHORIZED)
 
     def delete(self, request, pk):
-        author = get_object_or_404(TimeCard, pk=pk)
-        if author:
-            author.delete()
-        return Response({})
+        userCompany = request.user.employee.worksAtCompany.id
+
+        if request.user.has_perm('app.delete_timecard'):
+            if request.user.is_superuser:
+                timecard = get_object_or_404(TimeCard, pk=pk)
+            else:
+                timecard = TimeCard.objects.filter(checkIn__workplace__company=userCompany, pk=pk)
+            if timecard:
+                timecard.delete()
+            return Response({})
+        return Response(status.HTTP_401_UNAUTHORIZED)
