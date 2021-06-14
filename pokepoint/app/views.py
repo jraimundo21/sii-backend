@@ -1,6 +1,5 @@
 from django.contrib.auth import login, logout
-from django.contrib.auth.decorators import login_required
-from django.contrib.auth.models import Permission
+
 from django.shortcuts import render, get_object_or_404, \
     redirect
 from rest_framework import permissions
@@ -10,6 +9,7 @@ from rest_framework.views import APIView, Response, status
 from .models import Employee, TimeCard, CheckIn, Company, Workplace, CheckOut
 from .serializers import EmployeeSerializer, TimeCardSerializer, CheckInSerializer, \
     CheckOutSerializer, CompanySerializer, WorkplaceSerializer
+from rest_framework.authtoken.models import Token
 
 
 # ========== api
@@ -27,7 +27,7 @@ class LoginApi(APIView):
 
 class LogoutUser(APIView):
 
-    def post(self,request):
+    def post(self, request):
         logout(request)
         return redirect('api_login')
 
@@ -38,10 +38,11 @@ class RegisterApi(APIView):
     def post(self, request):
         serializer = EmployeeSerializer(data=request.data)
         if serializer.is_valid():
-            user = serializer.save()
-            user.set_password(user.password)
-            user.save()
-            login(request, user)
+            employee = serializer.save()
+            employee.set_password(employee.password)
+            employee.save()
+            Token.objects.create(user=employee)
+            login(request, employee)
             return Response(serializer.data, status=status.HTTP_201_CREATED)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
@@ -75,9 +76,9 @@ class CompanyDetail(APIView):
         userCompany = request.user.worksAtCompany_id
 
         if request.user.is_superuser or userCompany == pk:
-           company = get_object_or_404(Company, pk=pk)
-           serializer = CompanySerializer(company)
-           return Response(serializer.data)
+            company = get_object_or_404(Company, pk=pk)
+            serializer = CompanySerializer(company)
+            return Response(serializer.data)
         return Response(status.HTTP_401_UNAUTHORIZED)
 
     def put(self, request, pk):
@@ -106,6 +107,7 @@ class CompanyDetail(APIView):
             return Response(status.HTTP_401_UNAUTHORIZED)
         return Response(status.HTTP_401_UNAUTHORIZED)
 
+
 # -------------------------------------- Employee
 
 class EmployeeList(APIView):
@@ -119,17 +121,18 @@ class EmployeeList(APIView):
             employees = Employee.objects.filter(worksAtCompany=userCompany)
             serializer = EmployeeSerializer(employees, many=True)
             return Response(serializer.data)
+
     def post(self, request):
         isManager = request.user.groups.filter(name='manager').exists()
-
-        if isManage or request.user.is_superuser:
-           serializer = EmployeeSerializer(data=request.data)
-           if serializer.is_valid():
+        if isManager or request.user.is_superuser:
+            serializer = EmployeeSerializer(data=request.data)
+            if serializer.is_valid():
                 employee = serializer.save()
                 employee.set_password(employee.password)
                 employee.save()
+                Token.objects.create(user=employee)
                 return Response(serializer.data, status=status.HTTP_201_CREATED)
-           return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+            return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
         return Response(status.HTTP_401_UNAUTHORIZED)
 
 
@@ -139,9 +142,9 @@ class EmployeeDetail(APIView):
     def get(self, request, pk):
         userCompany = request.user.worksAtCompany_id
         if request.user.is_superuser:
-           employee = get_object_or_404(Employee, pk=pk)
+            employee = get_object_or_404(Employee, pk=pk)
         else:
-           employee = get_object_or_404(Employee, worksAtCompany=userCompany, pk=pk)
+            employee = get_object_or_404(Employee, worksAtCompany=userCompany, pk=pk)
         serializer = EmployeeSerializer(employee, many=False)
         return Response(serializer.data)
 
@@ -150,25 +153,28 @@ class EmployeeDetail(APIView):
         isManager = request.user.groups.filter(name='manager').exists()
 
         if isManager:
-           employee = get_object_or_404(Employee, worksAtCompany=userCompany, pk=pk)
+            employee = get_object_or_404(Employee, worksAtCompany=userCompany, pk=pk)
         if request.user.is_superuser:
-           employee = get_object_or_404(Employee, pk=pk)
+            employee = get_object_or_404(Employee, pk=pk)
         serializer = EmployeeSerializer(employee, data=request.data)
         if serializer.is_valid():
-           serializer.save()
-           return Response(serializer.data)
+            employee = serializer.save()
+            employee.set_password(employee.password)
+            employee.save()
+            Token.objects.create(user=employee)
+            return Response(serializer.data)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
     def delete(self, request, pk):
         userCompany = request.user.worksAtCompany_id
         isManager = request.user.groups.filter(name='manager').exists()
         if isManager:
-           employee = get_object_or_404(Employee, worksAtCompany=userCompany, pk=pk)
+            employee = get_object_or_404(Employee, worksAtCompany=userCompany, pk=pk)
         if request.user.is_superuser:
-           employee = get_object_or_404(Employee, pk=pk)
+            employee = get_object_or_404(Employee, pk=pk)
         if employee:
-           employee.delete()
-           return Response({})
+            employee.delete()
+            return Response({})
         return Response(status.HTTP_401_UNAUTHORIZED)
 
 
@@ -179,11 +185,13 @@ class WorkplaceList(APIView):
 
     def get(self, request):
         userCompany = request.user.worksAtCompany_id
-        if request.user.is_superuser or userCompany == pk:
+        if request.user.is_superuser:
             workplaces = Workplace.objects.all()
-            serializer = WorkplaceSerializer(workplaces, many=True)
-            return Response(serializer.data)
-        return Response(status.HTTP_401_UNAUTHORIZED)
+        else:
+            workplaces = Workplace.objects.filter(worksAtCompany=userCompany)
+        workplaces = Workplace.objects.all()
+        serializer = WorkplaceSerializer(workplaces, many=True)
+        return Response(serializer.data)
 
     def post(self, request):
         isManager = request.user.groups.filter(name='manager').exists()
@@ -202,11 +210,11 @@ class WorkplaceDetail(APIView):
 
     def get(self, request, pk):
         userCompany = request.user.worksAtCompany_id
-        print('usercomp==========', userCompany )
+        print('usercomp==========', userCompany)
         if request.user.is_superuser:
             workplace = get_object_or_404(Workplace, pk=pk)
         else:
-           workplace = get_object_or_404(Workplace, company=userCompany, pk=pk)
+            workplace = get_object_or_404(Workplace, company=userCompany, pk=pk)
         serializer = WorkplaceSerializer(workplace)
         return Response(serializer.data)
 
@@ -249,20 +257,26 @@ class CheckInList(APIView):
         userCompany = request.user.worksAtCompany_id
         isManager = request.user.groups.filter(name='manager').exists()
         if isManager:
-           checkinList = CheckIn.objects.filter(workplace__company=userCompany)
+            checkinList = CheckIn.objects.filter(workplace__company=userCompany)
         elif request.user.is_superuser:
-           checkinList = CheckIn.objects.all()
+            checkinList = CheckIn.objects.all()
         else:
-           checkinList = CheckIn.objects.filter(workplace__company=userCompany, timeCard__employee=request.user)
+            checkinList = CheckIn.objects.filter(workplace__company=userCompany, timeCard__employee=request.user)
         serializer = CheckInSerializer(checkinList, many=True)
         return Response(serializer.data)
 
     def post(self, request):
-            serializer = CheckInSerializer(data=request.data)
-            if serializer.is_valid():
-                serializer.save()
-                return Response(serializer.data, status=status.HTTP_201_CREATED)
-            return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+        # save timeCard with
+        timeCard = TimeCard()
+        timeCard.employee = request.user
+        timeCard.save()
+        request.data["timeCard"] = timeCard.id
+        # add timeCard in dicionary
+        serializer = CheckInSerializer(data=request.data)
+        if serializer.is_valid():
+            serializer.save()
+            return Response(serializer.data, status=status.HTTP_201_CREATED)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 
 class CheckInDetail(APIView):
@@ -305,8 +319,8 @@ class CheckInDetail(APIView):
         else:
             checkin = get_object_or_404(CheckIn, workplace__company=userCompany, timeCard__employee=request.user, pk=pk)
         if checkin:
-          checkin.delete()
-          return Response({})
+            checkin.delete()
+            return Response({})
 
 
 # -------------------------------------- Checkin
@@ -327,8 +341,14 @@ class CheckoutList(APIView):
         return Response(serializer.data)
 
     def post(self, request):
-
-        if request.user.has_perm('app.delete_checkout'):
+        # get checkin timecard
+        timecard = TimeCard.objects.filter(employee=request.user).last()
+        if not timecard:
+            return Response(status.HTTP_401_UNAUTHORIZED)
+        tc_serialize = TimeCardSerializer(timecard)
+        checkout = tc_serialize.data['checkOut']
+        if not checkout:
+            request.data["timeCard"] = tc_serialize.data['id']
             serializer = CheckOutSerializer(data=request.data)
             if serializer.is_valid():
                 serializer.save()
@@ -346,9 +366,10 @@ class CheckOutDetail(APIView):
         if isManager:
             checkout = get_object_or_404(CheckOut, workplace__company=userCompany, pk=pk)
         if request.user.is_superuser:
-           checkout = get_object_or_404(CheckOut, pk=pk)
+            checkout = get_object_or_404(CheckOut, pk=pk)
         else:
-           checkout = get_object_or_404(CheckOut, workplace__company=userCompany, timeCard__employee=request.user, pk=pk)
+            checkout = get_object_or_404(CheckOut, workplace__company=userCompany, timeCard__employee=request.user,
+                                         pk=pk)
         serializer = CheckOutSerializer(checkout)
         return Response(serializer.data)
 
@@ -360,11 +381,12 @@ class CheckOutDetail(APIView):
         if request.user.is_superuser:
             checkout = get_object_or_404(CheckOut, pk=pk)
         else:
-            checkout = get_object_or_404(CheckOut, workplace__company=userCompany, timeCard__employee=request.user, pk=pk)
+            checkout = get_object_or_404(CheckOut, workplace__company=userCompany, timeCard__employee=request.user,
+                                         pk=pk)
         serializer = CheckOutSerializer(checkout, data=request.data)
         if serializer.is_valid():
-           serializer.save()
-           return Response(serializer.data)
+            serializer.save()
+            return Response(serializer.data)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
     def delete(self, request, pk):
@@ -375,10 +397,11 @@ class CheckOutDetail(APIView):
         if request.user.is_superuser:
             checkout = get_object_or_404(CheckOut, pk=pk)
         else:
-            checkout = get_object_or_404(CheckOut, workplace__company=userCompany, timeCard__employee=request.user, pk=pk)
+            checkout = get_object_or_404(CheckOut, workplace__company=userCompany, timeCard__employee=request.user,
+                                         pk=pk)
         if checkout:
-           checkout.delete()
-           return Response({})
+            checkout.delete()
+            return Response({})
 
 
 # -------------------------------------- TimeCard
@@ -399,11 +422,11 @@ class TimeCardList(APIView):
         return Response(serializer.data)
 
     def post(self, request):
-            serializer = TimeCardSerializer(data=request.data)
-            if serializer.is_valid():
-                serializer.save()
-                return Response(serializer.data, status=status.HTTP_201_CREATED)
-            return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+        serializer = TimeCardSerializer(data=request.data)
+        if serializer.is_valid():
+            serializer.save()
+            return Response(serializer.data, status=status.HTTP_201_CREATED)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 
 class TimeCardDetail(APIView):
@@ -417,7 +440,8 @@ class TimeCardDetail(APIView):
         if request.user.is_superuser:
             timecard = get_object_or_404(TimeCard, pk=pk)
         else:
-            timeCards = get_object_or_404(TimeCard, checkIn__workplace__company=userCompany, employee=request.user, pk=pk)
+            timeCards = get_object_or_404(TimeCard, checkIn__workplace__company=userCompany, employee=request.user,
+                                          pk=pk)
         serializer = TimeCardSerializer(timecard, many=False)
         return Response(serializer.data)
 
@@ -429,11 +453,12 @@ class TimeCardDetail(APIView):
         if request.user.is_superuser:
             timecard = get_object_or_404(TimeCard, pk=pk)
         else:
-            timeCards = get_object_or_404(TimeCard, checkIn__workplace__company=userCompany, employee=request.user, pk=pk)
+            timeCards = get_object_or_404(TimeCard, checkIn__workplace__company=userCompany, employee=request.user,
+                                          pk=pk)
         serializer = TimeCardSerializer(timecard, data=request.data)
         if serializer.is_valid():
-           serializer.save()
-           return Response(serializer.data)
+            serializer.save()
+            return Response(serializer.data)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
     def delete(self, request, pk):
@@ -444,7 +469,8 @@ class TimeCardDetail(APIView):
         if request.user.is_superuser:
             timecard = get_object_or_404(TimeCard, pk=pk)
         else:
-            timeCards = get_object_or_404(TimeCard, checkIn__workplace__company=userCompany, employee=request.user, pk=pk)
+            timeCards = get_object_or_404(TimeCard, checkIn__workplace__company=userCompany, employee=request.user,
+                                          pk=pk)
         if timecard:
             timecard.delete()
             return Response({})

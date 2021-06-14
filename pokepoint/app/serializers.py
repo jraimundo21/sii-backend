@@ -7,7 +7,7 @@ from django.contrib.auth.hashers import make_password
 class CheckInSerializer(serializers.ModelSerializer):
     class Meta:
         model = CheckIn
-        fields = ['id', 'workplace', 'checkInType_id', 'timeCard', 'timestamp']
+        fields = ['id', 'workplace', 'checkInType', 'timeCard', 'timestamp']
 
 
 class CheckOutSerializer(serializers.ModelSerializer):
@@ -15,6 +15,8 @@ class CheckOutSerializer(serializers.ModelSerializer):
         model = CheckOut
         fields = ['id', 'workplace', 'timeCard', 'timestamp']
 
+        def create(self, validated_data):
+            return CheckOut.objects.create(**validated_data)
 
 class WorkplaceSerializer(serializers.ModelSerializer):
     class Meta:
@@ -29,6 +31,13 @@ class TimeCardSerializer(serializers.ModelSerializer):
     class Meta:
         model = TimeCard
         fields = ['id', 'checkIn', 'checkOut', 'employee']
+
+        def update(self, timeCard, validated_data):
+            timeCard.employee = validated_data.get('employee', timeCard.employee)
+            timeCard.save()
+            return timeCard
+
+
 
 
 class GroupSerializer(serializers.ModelSerializer):

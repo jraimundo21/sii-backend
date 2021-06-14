@@ -6,6 +6,7 @@ from .models import Employee, TimeCard, CheckIn, Company, Workplace, CheckOut
 from django.contrib.auth.decorators import login_required
 from .forms import CheckinForm, WorkplaceForm, CheckOutForm, CompanyForm, EmployeeForm
 from django.contrib import messages
+from rest_framework.authtoken.models import Token
 
 
 # =======App  ======
@@ -83,7 +84,10 @@ def addEmployee(request):
     if request.method == 'POST':
         if form.is_valid():
             form.set_password(form.password)
-            form.save()
+            employee = form.save()
+            employee.set_password(employee.password)
+            Token.objects.create(user=employee)
+            employee.save()
             messages.success(request, 'New Employee')
             return redirect('list_employee')
     return render(request, template_name, {'form': form, 'pageName': pageName})
@@ -100,6 +104,7 @@ def editEmployee(request, pk):
         if form.is_valid():
             employee = form.save()
             employee.set_password(employee.password)
+            Token.objects.create(user=employee)
             employee.save()
             return redirect('list_employee')
     return render(request, template_name, {'form': form, 'pageName': pageName})
