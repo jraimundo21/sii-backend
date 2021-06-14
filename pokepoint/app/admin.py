@@ -1,6 +1,6 @@
 from django.contrib import admin
 
-from .models import Employee, Company, Workplace, TimeCard, CheckIn, CheckOut, Manager, CheckInType
+from .models import Employee, Company, Workplace, TimeCard, CheckIn, CheckOut, CheckInType
 
 
 class EmployeeInline(admin.TabularInline):
@@ -19,10 +19,6 @@ class CheckInTypeAdmin(admin.ModelAdmin):
     model = [
         CheckInInline
     ]
-
-
-class ManagerInline(admin.TabularInline):
-    model = Manager
 
 
 class WorkplaceInline(admin.TabularInline):
@@ -46,7 +42,6 @@ admin.site.register(Company, CompanyAdmin)
 admin.site.register(TimeCard, TimeCardAdmin)
 admin.site.register(CheckInType, CheckInTypeAdmin)
 admin.site.register(Employee)
-admin.site.register(Manager)
 admin.site.register(CheckIn)
 admin.site.register(CheckOut)
 admin.site.register(Workplace)

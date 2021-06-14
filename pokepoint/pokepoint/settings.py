@@ -25,7 +25,7 @@ SECRET_KEY = 'django-insecure-=0uyn=ajjdzms=le%szndmj_e%a0x=%y1%s0zbhk!$_%nv)bk%
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = ['*']
 
 
 # Application definition
@@ -72,6 +72,7 @@ TEMPLATES = [
 ]
 CRISPY_TEMPLATE_PACK = 'bootstrap4'
 
+AUTH_USER_MODEL = 'app.Employee'
 WSGI_APPLICATION = 'pokepoint.wsgi.application'
 
 
