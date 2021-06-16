@@ -11,6 +11,7 @@ body {
   padding: 0 ;
   height: 100vh;
   overflow: hi;
+  background-color: #11443C;
   }
   .center{
     position: absolute;
@@ -18,7 +19,7 @@ body {
     left: 50%;
     transform:  translate(-50%, -50%);
     width: 400px;
-
+    background-color: #FFFFFF;
   }
 
 
@@ -51,7 +52,7 @@ button:hover {
  border-bottom: 1px solid silver;
 }
 .center form {
-  padding: 0 40px;
+  padding: 0 40px 40px;
 }
 
 span.psw {
@@ -73,7 +74,8 @@ span.psw {
     {% if forms.errors %}
     <p>There's  a error</p>
     {% endif %}
-  <h2>Login Form</h2>
+      <img src="app/asserts/logo.png" alt="logo" style="width:auto;">
+     <h2>Login Form</h2>
     <form method="POST" action="{% url 'login' %}" method="post">
        {% csrf_token %}
        {{ form }}
@@ -81,7 +83,6 @@ span.psw {
         <label>
           <input type="checkbox" checked="checked" name="remember"> Remember me
         </label>
-
        <input type="hidden" name="next" value="{{ next }}">
         <span class="psw">Forgot <a href="#">password?</a></span>
     </form>

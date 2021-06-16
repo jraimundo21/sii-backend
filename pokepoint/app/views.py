@@ -119,8 +119,8 @@ class EmployeeList(APIView):
             employees = Employee.objects.all()
         else:
             employees = Employee.objects.filter(worksAtCompany=userCompany)
-            serializer = EmployeeSerializer(employees, many=True)
-            return Response(serializer.data)
+        serializer = EmployeeSerializer(employees, many=True)
+        return Response(serializer.data)
 
     def post(self, request):
         isManager = request.user.groups.filter(name='manager').exists()
@@ -145,7 +145,7 @@ class EmployeeDetail(APIView):
             employee = get_object_or_404(Employee, pk=pk)
         else:
             employee = get_object_or_404(Employee, worksAtCompany=userCompany, pk=pk)
-        serializer = EmployeeSerializer(employee, many=False)
+        serializer = EmployeeSerializer(employee, many=True)
         return Response(serializer.data)
 
     def put(self, request, pk):
@@ -210,7 +210,6 @@ class WorkplaceDetail(APIView):
 
     def get(self, request, pk):
         userCompany = request.user.worksAtCompany_id
-        print('usercomp==========', userCompany)
         if request.user.is_superuser:
             workplace = get_object_or_404(Workplace, pk=pk)
         else:
