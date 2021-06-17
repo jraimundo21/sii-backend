@@ -17,7 +17,8 @@ from rest_framework.authtoken.models import Token
 class LoginApi(APIView):
     permission_classes = (permissions.AllowAny,)
 
-    def post(self, request):
+    @staticmethod
+    def post(request):
         serializer = AuthTokenSerializer(data=request.data)
         serializer.is_valid(raise_exception=True)
         user = serializer.validated_data['user']
@@ -35,7 +36,8 @@ class LogoutUser(APIView):
 class RegisterApi(APIView):
     permission_classes = (permissions.AllowAny,)
 
-    def post(self, request):
+    @staticmethod
+    def post(request):
         serializer = EmployeeSerializer(data=request.data)
         if serializer.is_valid():
             employee = serializer.save()
@@ -52,6 +54,7 @@ class RegisterApi(APIView):
 class CompanyList(APIView):
     """List all Companies"""
 
+    @staticmethod
     def get(self, request):
         if request.user.is_superuser:
             companies = Company.objects.all()
@@ -59,6 +62,7 @@ class CompanyList(APIView):
             return Response(serializer.data)
         return Response(status.HTTP_401_UNAUTHORIZED)
 
+    @staticmethod
     def post(self, request):
         if request.user.has_perm('app.add_company'):
             serializer = CompanySerializer(data=request.data)
@@ -72,6 +76,7 @@ class CompanyList(APIView):
 class CompanyDetail(APIView):
     """Lists a company"""
 
+    @staticmethod
     def get(self, request, pk):
         userCompany = request.user.worksAtCompany_id
 
@@ -81,6 +86,7 @@ class CompanyDetail(APIView):
             return Response(serializer.data)
         return Response(status.HTTP_401_UNAUTHORIZED)
 
+    @staticmethod
     def put(self, request, pk):
         userCompany = request.user.worksAtCompany_id
 
@@ -95,6 +101,7 @@ class CompanyDetail(APIView):
             return Response(status.HTTP_401_UNAUTHORIZED)
         return Response(status.HTTP_401_UNAUTHORIZED)
 
+    @staticmethod
     def delete(self, request, pk):
         userCompany = request.user.worksAtCompany_id
 
@@ -113,6 +120,7 @@ class CompanyDetail(APIView):
 class EmployeeList(APIView):
     """List all employee."""
 
+    @staticmethod
     def get(self, request):
         userCompany = request.user.worksAtCompany_id
         if request.user.is_superuser:
@@ -122,6 +130,7 @@ class EmployeeList(APIView):
         serializer = EmployeeSerializer(employees, many=True)
         return Response(serializer.data)
 
+    @staticmethod
     def post(self, request):
         isManager = request.user.groups.filter(name='manager').exists()
         if isManager or request.user.is_superuser:
@@ -139,6 +148,7 @@ class EmployeeList(APIView):
 class EmployeeDetail(APIView):
     """Lists a employee."""
 
+    @staticmethod
     def get(self, request, pk):
         userCompany = request.user.worksAtCompany_id
         if request.user.is_superuser:
@@ -148,6 +158,7 @@ class EmployeeDetail(APIView):
         serializer = EmployeeSerializer(employee, many=True)
         return Response(serializer.data)
 
+    @staticmethod
     def put(self, request, pk):
         userCompany = request.user.worksAtCompany_id
         isManager = request.user.groups.filter(name='manager').exists()
@@ -165,6 +176,7 @@ class EmployeeDetail(APIView):
             return Response(serializer.data)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
+    @staticmethod
     def delete(self, request, pk):
         userCompany = request.user.worksAtCompany_id
         isManager = request.user.groups.filter(name='manager').exists()
@@ -183,6 +195,7 @@ class EmployeeDetail(APIView):
 class WorkplaceList(APIView):
     """List all workplace."""
 
+    @staticmethod
     def get(self, request):
         userCompany = request.user.worksAtCompany_id
         if request.user.is_superuser:
@@ -193,6 +206,7 @@ class WorkplaceList(APIView):
         serializer = WorkplaceSerializer(workplaces, many=True)
         return Response(serializer.data)
 
+    @staticmethod
     def post(self, request):
         isManager = request.user.groups.filter(name='manager').exists()
 
@@ -208,6 +222,7 @@ class WorkplaceList(APIView):
 class WorkplaceDetail(APIView):
     """Lists a Workplace."""
 
+    @staticmethod
     def get(self, request, pk):
         userCompany = request.user.worksAtCompany_id
         if request.user.is_superuser:
@@ -217,6 +232,7 @@ class WorkplaceDetail(APIView):
         serializer = WorkplaceSerializer(workplace)
         return Response(serializer.data)
 
+    @staticmethod
     def put(self, request, pk):
         userCompany = request.user.worksAtCompany_id
         isManager = request.user.groups.filter(name='manager').exists()
@@ -232,6 +248,7 @@ class WorkplaceDetail(APIView):
             return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
         return Response(status.HTTP_401_UNAUTHORIZED)
 
+    @staticmethod
     def delete(self, request, pk):
         userCompany = request.user.employee.worksAtCompany.id
         isManager = request.user.groups.filter(name='manager').exists()
@@ -252,6 +269,7 @@ class WorkplaceDetail(APIView):
 class CheckInList(APIView):
     """List all checkin."""
 
+    @staticmethod
     def get(self, request):
         userCompany = request.user.worksAtCompany_id
         isManager = request.user.groups.filter(name='manager').exists()
@@ -264,6 +282,7 @@ class CheckInList(APIView):
         serializer = CheckInSerializer(checkinList, many=True)
         return Response(serializer.data)
 
+    @staticmethod
     def post(self, request):
         # save timeCard with
         timeCard = TimeCard()
@@ -281,6 +300,7 @@ class CheckInList(APIView):
 class CheckInDetail(APIView):
     """Lists a CheckIn."""
 
+    @staticmethod
     def get(self, request, pk):
         userCompany = request.user.worksAtCompany_id
         isManager = request.user.groups.filter(name='manager').exists()
@@ -293,7 +313,9 @@ class CheckInDetail(APIView):
         serializer = CheckInSerializer(checkin)
         return Response(serializer.data)
 
+    @staticmethod
     def put(self, request, pk):
+
         userCompany = request.user.worksAtCompany_id
         isManager = request.user.groups.filter(name='manager').exists()
         if isManager:
@@ -308,6 +330,7 @@ class CheckInDetail(APIView):
             return Response(serializer.data)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
+    @staticmethod
     def delete(self, request, pk):
         userCompany = request.user.worksAtCompany_id
         isManager = request.user.groups.filter(name='manager').exists()
@@ -327,6 +350,7 @@ class CheckInDetail(APIView):
 class CheckoutList(APIView):
     """List all checkin."""
 
+    @staticmethod
     def get(self, request):
         userCompany = request.user.worksAtCompany_id
         isManager = request.user.groups.filter(name='manager').exists()
@@ -339,6 +363,7 @@ class CheckoutList(APIView):
         serializer = CheckOutSerializer(checkoutList, many=True)
         return Response(serializer.data)
 
+    @staticmethod
     def post(self, request):
         # get checkin timecard
         timecard = TimeCard.objects.filter(employee=request.user).last()
@@ -359,6 +384,7 @@ class CheckoutList(APIView):
 class CheckOutDetail(APIView):
     """Lists a CheckOut."""
 
+    @staticmethod
     def get(self, request, pk):
         userCompany = request.user.worksAtCompany_id
         isManager = request.user.groups.filter(name='manager').exists()
@@ -372,6 +398,7 @@ class CheckOutDetail(APIView):
         serializer = CheckOutSerializer(checkout)
         return Response(serializer.data)
 
+    @staticmethod
     def put(self, request, pk):
         userCompany = request.user.worksAtCompany_id
         isManager = request.user.groups.filter(name='manager').exists()
@@ -388,6 +415,7 @@ class CheckOutDetail(APIView):
             return Response(serializer.data)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
+    @staticmethod
     def delete(self, request, pk):
         userCompany = request.user.worksAtCompany_id
         isManager = request.user.groups.filter(name='manager').exists()
@@ -408,6 +436,7 @@ class CheckOutDetail(APIView):
 class TimeCardList(APIView):
     """List all timeCard."""
 
+    @staticmethod
     def get(self, request):
         userCompany = request.user.worksAtCompany_id
         isManager = request.user.groups.filter(name='manager').exists()
@@ -420,6 +449,7 @@ class TimeCardList(APIView):
         serializer = TimeCardSerializer(timeCards, many=True)
         return Response(serializer.data)
 
+    @staticmethod
     def post(self, request):
         serializer = TimeCardSerializer(data=request.data)
         if serializer.is_valid():
@@ -431,6 +461,7 @@ class TimeCardList(APIView):
 class TimeCardDetail(APIView):
     """Lists a timeCard."""
 
+    @staticmethod
     def get(self, request, pk):
         userCompany = request.user.worksAtCompany_id
         isManager = request.user.groups.filter(name='manager').exists()
@@ -444,6 +475,7 @@ class TimeCardDetail(APIView):
         serializer = TimeCardSerializer(timecard, many=False)
         return Response(serializer.data)
 
+    @staticmethod
     def put(self, request, pk):
         userCompany = request.user.worksAtCompany_id
         isManager = request.user.groups.filter(name='manager').exists()
@@ -460,6 +492,7 @@ class TimeCardDetail(APIView):
             return Response(serializer.data)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
+    @staticmethod
     def delete(self, request, pk):
         userCompany = request.user.worksAtCompany_id
         isManager = request.user.groups.filter(name='manager').exists()
