@@ -1,47 +1,47 @@
 {% extends "app/layout/layout.html" %}
 
 {% block content %}
-          <main class="col-md-9 ms-sm-auto col-lg-10 px-md-4">
-          <div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom">
-            <h1 class="h2">Employees</h1>
-            <div class="btn-toolbar mb-2 mb-md-0">
-                <a type="button" class="btn btn-sm btn-outline-secondary" href="{% url 'add_employee' %}">+add</a>
-            </div>
-          </div>
-              {% for message in messages %}
-				<div class="alert alert-success alert-dismissible fade show" role="alert">
-                  <p id="messages">{{message}}</p>
-                  <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
-                </div>
-				{% endfor %}
-          <div class="table-responsive">
-            <table class="table table-striped table-sm">
-              <thead>
-                <tr>
-                  <th>#Number</th>
-                  <th>Name</th>
-                  <th>Email</th>
-                  <th>Nif</th>
-                  <th>Adress</th>
-                  <th>Action</th>
-                </tr>
-              </thead>
-              <tbody>
-               {% for employee in employees %}
-                <tr>
-                  <td>{{employee.id}}</td>
-                  <td>{{employee.name}}</td>
-                  <td>{{employee.email}}</td>
-                  <td>{{employee.nif}}</td>
-                  <td>{{employee.adress}}</td>
-                  <td>
-                     <a type="button" class="btn btn-sm btn-secondary" href="{% url 'employee' employee.id %}">Editar</a>
-                     <a type="button" class="btn btn-sm btn-secondary" href="{% url 'delete_employee' employee.id %}">Eliminar</a>
-                  </td>
-                </tr>
-                {% endfor %}
-              </tbody>
-            </table>
-          </div>
-        </main>
+<main class="col-md-9 ms-sm-auto col-lg-10 px-md-4">
+    <div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom">
+        <h1 class="h2">Employees</h1>
+        <div class="btn-toolbar mb-2 mb-md-0">
+            <a type="button" class="btn btn-sm btn-outline-secondary" href="{% url 'add_employee' %}">+add</a>
+        </div>
+    </div>
+    {% for message in messages %}
+    <div class="alert alert-success alert-dismissible fade show" role="alert">
+        <p id="messages">{{message}}</p>
+        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+    </div>
+    {% endfor %}
+    <div class="table-responsive">
+        <table class="table table-striped table-sm">
+            <thead>
+            <tr>
+                <th>#Number</th>
+                <th>Name</th>
+                <th>Email</th>
+                <th>Nif</th>
+                <th>Address</th>
+                <th>Action</th>
+            </tr>
+            </thead>
+            <tbody>
+            {% for employee in employees %}
+            <tr>
+                <td>{{employee.id}}</td>
+                <td>{{employee.name}}</td>
+                <td>{{employee.email}}</td>
+                <td>{{employee.nif}}</td>
+                <td>{{employee.address}}</td>
+                <td>
+                    <a type="button" class="btn btn-sm btn-secondary" href="{% url 'employee' employee.id %}">Edit</a>
+                    <a type="button" class="btn btn-sm btn-secondary" href="{% url 'delete_employee' employee.id %}">Delete</a>
+                </td>
+            </tr>
+            {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</main>
 {% endblock content %}

@@ -1,41 +1,41 @@
 {% extends "app/layout/layout.html" %}
 
 {% block content %}
-          <main class="col-md-9 ms-sm-auto col-lg-10 px-md-4">
-          <div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom">
-            <h1 class="h2">Company</h1>
-            <div class="btn-toolbar mb-2 mb-md-0">
-                <a type="button" class="btn btn-sm btn-outline-secondary" href="{% url 'add_company' %}">+add</a>
-            </div>
-          </div>
-          <div class="table-responsive">
-            <table class="table table-striped table-sm">
-              <thead>
-                <tr>
-                  <th>#Number</th>
-                  <th>Name</th>
-                  <th>Email</th>
-                  <th>Nif</th>
-                  <th>Adress</th>
-                  <th>Action</th>
-                </tr>
-              </thead>
-              <tbody>
-               {% for company in companies %}
-                <tr>
-                  <td>{{comany.id}}</td>
-                  <td>{{employee.name}}</td>
-                  <td>{{employee.email}}</td>
-                  <td>{{employee.nif}}</td>
-                  <td>{{employee.adress}}</td>
-                  <td>
-                     <a type="button" class="btn btn-sm btn-secondary" href="{% url 'employee' employee.id %}">Editar</a>
-                     <a type="button" class="btn btn-sm btn-secondary" href="{% url 'delete_employee' employee.id %}">Eliminar</a>
-                  </td>
-                </tr>
-                {% endfor %}
-              </tbody>
-            </table>
-          </div>
-        </main>
+<main class="col-md-9 ms-sm-auto col-lg-10 px-md-4">
+    <div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom">
+        <h1 class="h2">Company</h1>
+        <div class="btn-toolbar mb-2 mb-md-0">
+            <a type="button" class="btn btn-sm btn-outline-secondary" href="{% url 'add_company' %}">+add</a>
+        </div>
+    </div>
+    <div class="table-responsive">
+        <table class="table table-striped table-sm">
+            <thead>
+            <tr>
+                <th>#Number</th>
+                <th>Name</th>
+                <th>Email</th>
+                <th>Nif</th>
+                <th>Address</th>
+                <th>Action</th>
+            </tr>
+            </thead>
+            <tbody>
+            {% for company in companies %}
+            <tr>
+                <td>{{company.id}}</td>
+                <td>{{employee.name}}</td>
+                <td>{{employee.email}}</td>
+                <td>{{employee.nif}}</td>
+                <td>{{employee.address}}</td>
+                <td>
+                    <a type="button" class="btn btn-sm btn-secondary" href="{% url 'employee' employee.id %}">Edit</a>
+                    <a type="button" class="btn btn-sm btn-secondary" href="{% url 'delete_employee' employee.id %}">Delete</a>
+                </td>
+            </tr>
+            {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</main>
 {% endblock content %}

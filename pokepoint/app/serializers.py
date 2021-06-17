@@ -1,8 +1,8 @@
 from rest_framework import serializers
 
 from .models import Employee, Company, Workplace, TimeCard, CheckIn, CheckOut
-from django.contrib.auth.models import User, Group
-from django.contrib.auth.hashers import make_password
+from django.contrib.auth.models import Group
+
 
 class CheckInSerializer(serializers.ModelSerializer):
     class Meta:
@@ -15,8 +15,10 @@ class CheckOutSerializer(serializers.ModelSerializer):
         model = CheckOut
         fields = ['id', 'workplace', 'timeCard', 'timestamp']
 
-        def create(self, validated_data):
+        @staticmethod
+        def create(validated_data):
             return CheckOut.objects.create(**validated_data)
+
 
 class WorkplaceSerializer(serializers.ModelSerializer):
     class Meta:
@@ -32,12 +34,11 @@ class TimeCardSerializer(serializers.ModelSerializer):
         model = TimeCard
         fields = ['id', 'checkIn', 'checkOut', 'employee']
 
-        def update(self, timeCard, validated_data):
-            timeCard.employee = validated_data.get('employee', timeCard.employee)
-            timeCard.save()
-            return timeCard
-
-
+        @staticmethod
+        def update(time_card, validated_data):
+            time_card.employee = validated_data.get('employee', time_card.employee)
+            time_card.save()
+            return time_card
 
 
 class GroupSerializer(serializers.ModelSerializer):
@@ -48,7 +49,8 @@ class GroupSerializer(serializers.ModelSerializer):
 
 class EmployeeSerializer(serializers.ModelSerializer):
     timeCards = TimeCardSerializer(many=True, read_only=True)
-    #groups = GroupSerializer(many=True)
+
+    # groups = GroupSerializer(many=True)
 
     class Meta:
         model = Employee

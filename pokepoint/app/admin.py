@@ -45,5 +45,3 @@ admin.site.register(Employee)
 admin.site.register(CheckIn)
 admin.site.register(CheckOut)
 admin.site.register(Workplace)
-
-
