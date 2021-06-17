@@ -66,6 +66,7 @@ class Employee(AbstractBaseUser, PermissionsMixin):
 
 
 class Company(models.Model):
+    objects = None
     name = models.CharField(max_length=100)
     nif = models.CharField(max_length=9)
     address = models.CharField(max_length=200)

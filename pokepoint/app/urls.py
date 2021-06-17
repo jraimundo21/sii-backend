@@ -1,4 +1,4 @@
-from django.urls import path
+from django.urls import path,include
 
 from . import views, app_views
 
@@ -6,9 +6,9 @@ from . import views, app_views
 urlpatterns = [
 
     # ------- Auth
+    path('', include('django.contrib.auth.urls')),
     path('logout/', app_views.logoutUser, name='logout_user'),
-
-    path('', app_views.index, name='index'),
+    path('index', app_views.index, name='index'),
 
     # ----------Employee
     path('employees/', app_views.listEmployee, name='list_employee'),
