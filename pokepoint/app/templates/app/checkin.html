@@ -1,48 +1,48 @@
 {% extends "app/layout/layout.html" %}
 
 {% block content %}
-          <main class="col-md-9 ms-sm-auto col-lg-10 px-md-4">
-          <div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom">
-            <h1 class="h2">Check-in</h1>
-            <div class="btn-toolbar mb-2 mb-md-0">
-                <a type="button" class="btn btn-sm btn-outline-secondary" href="{% url 'add_checkin' %}">+add</a>
-            </div>
-          </div>
-              {% for message in messages %}
-				<div class="alert alert-success alert-dismissible fade show" role="alert">
-                  <p id="messages">{{message}}</p>
-                  <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
-                </div>
-				{% endfor %}
-          <div class="table-responsive">
-            <table class="table table-striped table-sm">
-              <thead>
-                <tr>
-                  <th>Employee</th>
-                  <th>Workplace</th>
-                  <th>Check-in type</th>
-                  <th>Date</th>
-                  <th>Time</th>
-                    <th>Action</th>
-                </tr>
-              </thead>
-              <tbody>
-               {% for checkin in checkList %}
-                <tr>
-                  <td>{{checkin.timeCard.employee.name}}</td>
-                  <td>{{checkin.workplace.name}}</td>
-                  <td>{{checkin.checkInType.name}}</td>
-                  <td>{{ checkin.timestamp|date:"d-m-Y" }}</td>
-                  <td>{{ checkin.timestamp|date:"h:i" }}</td>
+<main class="col-md-9 ms-sm-auto col-lg-10 px-md-4">
+    <div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom">
+        <h1 class="h2">Check-in</h1>
+        <div class="btn-toolbar mb-2 mb-md-0">
+            <a type="button" class="btn btn-sm btn-outline-secondary" href="{% url 'add_checkin' %}">+add</a>
+        </div>
+    </div>
+    {% for message in messages %}
+    <div class="alert alert-success alert-dismissible fade show" role="alert">
+        <p id="messages">{{message}}</p>
+        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+    </div>
+    {% endfor %}
+    <div class="table-responsive">
+        <table class="table table-striped table-sm">
+            <thead>
+            <tr>
+                <th>Employee</th>
+                <th>Workplace</th>
+                <th>Check-in type</th>
+                <th>Date</th>
+                <th>Time</th>
+                <th>Action</th>
+            </tr>
+            </thead>
+            <tbody>
+            {% for checkin in checkList %}
+            <tr>
+                <td>{{checkin.timeCard.employee.name}}</td>
+                <td>{{checkin.workplace.name}}</td>
+                <td>{{checkin.checkInType.name}}</td>
+                <td>{{ checkin.timestamp|date:"d-m-Y" }}</td>
+                <td>{{ checkin.timestamp|date:"h:i" }}</td>
 
-                    <td>
-                     <a type="button" class="btn btn-sm btn-secondary" href="{% url 'checkin' checkin.id %}">Editar</a>
-                     <a type="button" class="btn btn-sm btn-secondary" href="{% url 'delete_checkin' checkin.id %}">Eliminar</a>
-                  </td>
-                </tr>
-                {% endfor %}
-              </tbody>
-            </table>
-          </div>
-        </main>
+                <td>
+                    <a type="button" class="btn btn-sm btn-secondary" href="{% url 'checkin' checkin.id %}">Edit</a>
+                    <a type="button" class="btn btn-sm btn-secondary" href="{% url 'delete_checkin' checkin.id %}">Delete</a>
+                </td>
+            </tr>
+            {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</main>
 {% endblock content %}

@@ -20,9 +20,6 @@ def logoutUser(request):
 # _________________________________________________________________Companies
 @login_required(login_url='login')
 def index(request):
-    # employee =Employee.objects.get(user= request.user.id )
-    # if(request.user.id==
-    # company = Company.objects.get(id=pk)
     template_name = 'app/index.html'
     return render(request, template_name)
 
@@ -31,7 +28,7 @@ def index(request):
 def listCompany(request):
     companies = Company.objects.all()
     template_name = 'app/company.html'
-    return render(request, template_name, {'companys': companies})
+    return render(request, template_name, {'companies': companies})
 
 
 @login_required(login_url='login')
@@ -80,7 +77,7 @@ def listEmployee(request):
 def addEmployee(request):
     form = EmployeeForm(request.POST or None)
     template_name = 'app/form.html'
-    pageName = 'Adcionar Employee'
+    page_name = 'Add Employee'
     if request.method == 'POST':
         if form.is_valid():
             form.set_password(form.password)
@@ -90,7 +87,7 @@ def addEmployee(request):
             employee.save()
             messages.success(request, 'New Employee')
             return redirect('list_employee')
-    return render(request, template_name, {'form': form, 'pageName': pageName})
+    return render(request, template_name, {'form': form, 'pageName': page_name})
 
 
 @login_required(login_url='login')
@@ -98,7 +95,7 @@ def editEmployee(request, pk):
     employee = Employee.objects.get(id=pk)
     form = EmployeeForm(instance=employee)
     template_name = 'app/form.html'
-    pageName = 'Employee Edited '
+    page_name = 'Employee Edited '
     if request.method == 'POST':
         form = EmployeeForm(request.POST, instance=employee)
         if form.is_valid():
@@ -107,7 +104,7 @@ def editEmployee(request, pk):
             Token.objects.create(user=employee)
             employee.save()
             return redirect('list_employee')
-    return render(request, template_name, {'form': form, 'pageName': pageName})
+    return render(request, template_name, {'form': form, 'pageName': page_name})
 
 
 @login_required(login_url='login')
@@ -130,13 +127,13 @@ def listWorkplace(request):
 def addWorkplace(request):
     form = WorkplaceForm(request.POST or None)
     template_name = 'app/form.html'
-    pageName = 'Adicionar Workpalce'
+    page_name = 'Add Workplace'
     if request.method == 'POST':
         if form.is_valid():
             form.save()
             messages.success(request, 'New Workplace ')
             return redirect('list_workplace')
-    return render(request, template_name, {'form': form, 'pageName': pageName})
+    return render(request, template_name, {'form': form, 'pageName': page_name})
 
 
 @login_required(login_url='login')
@@ -144,14 +141,14 @@ def editWorkplace(request, pk):
     workplace = Workplace.objects.get(id=pk)
     form = WorkplaceForm(instance=workplace)
     template_name = 'app/form.html'
-    pageName = 'Editor Workplace'
+    page_name = 'Editor Workplace'
     if request.method == 'POST':
         form = WorkplaceForm(request.POST, instance=workplace)
         if form.is_valid():
             form.save()
             messages.success(request, 'Workplace Edited')
             return redirect('list_workplace')
-    return render(request, template_name, {'form': form, 'pageName': pageName})
+    return render(request, template_name, {'form': form, 'pageName': page_name})
 
 
 @login_required(login_url='login')
@@ -166,22 +163,22 @@ def deleteWorkplace(request, pk):
 
 @login_required(login_url='login')
 def listCheckin(request):
-    checkList = CheckIn.objects.all()
+    check_list = CheckIn.objects.all()
     template_name = 'app/checkin.html'
-    return render(request, template_name, {'checkList': checkList})
+    return render(request, template_name, {'checkList': check_list})
 
 
 @login_required(login_url='login')
 def addCheckin(request):
     form = CheckinForm(request.POST or None)
     template_name = 'app/form.html'
-    pageName = 'Adicionar Checkin'
+    page_name = 'Add Checkin'
     if request.method == 'POST':
         if form.is_valid():
             form.save()
             messages.success(request, 'New Check-in ')
             return redirect('list_checkin')
-    return render(request, template_name, {'form': form, 'pageName': pageName})
+    return render(request, template_name, {'form': form, 'pageName': page_name})
 
 
 @login_required(login_url='login')
@@ -189,14 +186,14 @@ def editCheckin(request, pk):
     checkin = CheckIn.objects.get(id=pk)
     form = CheckinForm(instance=checkin)
     template_name = 'app/form.html'
-    pageName = 'Adicionar Checkin'
+    page_name = 'Add Checkin'
     if request.method == 'POST':
         form = CheckinForm(request.POST, instance=checkin)
         if form.is_valid():
             form.save()
             messages.success(request, 'Check-in Edited')
             return redirect('list_checkin')
-    return render(request, template_name, {'form': form, 'pageName': pageName})
+    return render(request, template_name, {'form': form, 'pageName': page_name})
 
 
 @login_required(login_url='login')
@@ -219,33 +216,33 @@ def listCheckout(request):
 def addCheckout(request):
     form = CheckOutForm(request.POST or None)
     template_name = 'app/form.html'
-    pageName = 'Adicionar Checkout'
+    page_name = 'Adicionar Checkout'
     if request.method == 'POST':
         if form.is_valid():
             form.save()
             messages.success(request, 'New Check-out')
             return redirect('list_checkOut')
-    return render(request, template_name, {'form': form, 'pageName': pageName})
+    return render(request, template_name, {'form': form, 'pageName': page_name})
 
 
 @login_required(login_url='login')
 def editCheckout(request, pk):
-    checkOut = CheckOut.objects.get(id=pk)
-    form = CheckOutForm(instance=checkOut)
+    check_out = CheckOut.objects.get(id=pk)
+    form = CheckOutForm(instance=check_out)
     template_name = 'app/form.html'
-    pageName = 'Editar Checkin'
+    page_name = 'Edit Checkin'
     if request.method == 'POST':
-        form = CheckOutForm(request.POST, instance=checkOut)
+        form = CheckOutForm(request.POST, instance=check_out)
         if form.is_valid():
             form.save()
-            messages.success(request, 'Check-outEdited')
+            messages.success(request, 'Check-out Edited')
             return redirect('list_checkOut')
-    return render(request, template_name, {'form': form, 'pageName': pageName})
+    return render(request, template_name, {'form': form, 'pageName': page_name})
 
 
 @login_required(login_url='login')
 def deleteCheckout(request, pk):
-    checkOut = get_object_or_404(CheckOut, pk=pk)
-    checkOut.delete()
-    messages.success(request, 'Check-out deleted ')
+    check_out = get_object_or_404(CheckOut, pk=pk)
+    check_out.delete()
+    messages.success(request, 'Check-out Deleted ')
     return redirect('list_checkOut')

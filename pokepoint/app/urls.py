@@ -1,7 +1,6 @@
-from django.urls import path,include
+from django.urls import path, include
 
 from . import views, app_views
-
 
 urlpatterns = [
 
@@ -66,4 +65,3 @@ urlpatterns = [
     path('api/checkout/<int:pk>/', views.CheckOutDetail.as_view(), name='api_checkout_detail'),
 
 ]
-

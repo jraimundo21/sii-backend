@@ -27,15 +27,12 @@ class WorkplaceForm(forms.ModelForm):
 
 
 class TimeCardForm(forms.ModelForm):
-  class Meta:
+    class Meta:
         model = TimeCard
         fields = ['id', 'employee']
 
 
 class CompanyForm(forms.ModelForm):
-
     class Meta:
         model = Company
         fields = ['id', 'name', 'nif', 'address', 'email', 'phone']
-
-

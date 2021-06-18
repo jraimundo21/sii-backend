@@ -1,6 +1,6 @@
 from django.contrib.auth import login, logout
 
-from django.shortcuts import render, get_object_or_404, \
+from django.shortcuts import get_object_or_404, \
     redirect
 from rest_framework import permissions
 from rest_framework.authtoken.serializers import AuthTokenSerializer
@@ -28,7 +28,8 @@ class LoginApi(APIView):
 
 class LogoutUser(APIView):
 
-    def post(self, request):
+    @staticmethod
+    def post(request):
         logout(request)
         return redirect('api_login')
 
@@ -55,7 +56,7 @@ class CompanyList(APIView):
     """List all Companies"""
 
     @staticmethod
-    def get(self, request):
+    def get(request):
         if request.user.is_superuser:
             companies = Company.objects.all()
             serializer = CompanySerializer(companies, many=True)
@@ -63,7 +64,7 @@ class CompanyList(APIView):
         return Response(status.HTTP_401_UNAUTHORIZED)
 
     @staticmethod
-    def post(self, request):
+    def post(request):
         if request.user.has_perm('app.add_company'):
             serializer = CompanySerializer(data=request.data)
             if serializer.is_valid():
@@ -77,20 +78,20 @@ class CompanyDetail(APIView):
     """Lists a company"""
 
     @staticmethod
-    def get(self, request, pk):
-        userCompany = request.user.worksAtCompany_id
+    def get(request, pk):
+        user_company = request.user.worksAtCompany_id
 
-        if request.user.is_superuser or userCompany == pk:
+        if request.user.is_superuser or user_company == pk:
             company = get_object_or_404(Company, pk=pk)
             serializer = CompanySerializer(company)
             return Response(serializer.data)
         return Response(status.HTTP_401_UNAUTHORIZED)
 
     @staticmethod
-    def put(self, request, pk):
-        userCompany = request.user.worksAtCompany_id
+    def put(request, pk):
+        user_company = request.user.worksAtCompany_id
 
-        if request.user.is_superuser or userCompany == pk:
+        if request.user.is_superuser or user_company == pk:
             if request.user.has_perm('app.change_company'):
                 company = get_object_or_404(Company, pk=pk)
                 serializer = CompanySerializer(company, data=request.data)
@@ -102,10 +103,10 @@ class CompanyDetail(APIView):
         return Response(status.HTTP_401_UNAUTHORIZED)
 
     @staticmethod
-    def delete(self, request, pk):
-        userCompany = request.user.worksAtCompany_id
+    def delete(request, pk):
+        user_company = request.user.worksAtCompany_id
 
-        if request.user.is_superuser or userCompany == pk:
+        if request.user.is_superuser or user_company == pk:
             if request.user.has_perm('app.delete_company'):
                 company = get_object_or_404(Company, pk=pk)
                 if company:
@@ -121,19 +122,19 @@ class EmployeeList(APIView):
     """List all employee."""
 
     @staticmethod
-    def get(self, request):
-        userCompany = request.user.worksAtCompany_id
+    def get(request):
+        user_company = request.user.worksAtCompany_id
         if request.user.is_superuser:
             employees = Employee.objects.all()
         else:
-            employees = Employee.objects.filter(worksAtCompany=userCompany)
+            employees = Employee.objects.filter(worksAtCompany=user_company)
         serializer = EmployeeSerializer(employees, many=True)
         return Response(serializer.data)
 
     @staticmethod
-    def post(self, request):
-        isManager = request.user.groups.filter(name='manager').exists()
-        if isManager or request.user.is_superuser:
+    def post(request):
+        is_manager = request.user.groups.filter(name='manager').exists()
+        if is_manager or request.user.is_superuser:
             serializer = EmployeeSerializer(data=request.data)
             if serializer.is_valid():
                 employee = serializer.save()
@@ -149,22 +150,22 @@ class EmployeeDetail(APIView):
     """Lists a employee."""
 
     @staticmethod
-    def get(self, request, pk):
-        userCompany = request.user.worksAtCompany_id
+    def get(request, pk):
+        user_company = request.user.worksAtCompany_id
         if request.user.is_superuser:
             employee = get_object_or_404(Employee, pk=pk)
         else:
-            employee = get_object_or_404(Employee, worksAtCompany=userCompany, pk=pk)
+            employee = get_object_or_404(Employee, worksAtCompany=user_company, pk=pk)
         serializer = EmployeeSerializer(employee, many=True)
         return Response(serializer.data)
 
     @staticmethod
-    def put(self, request, pk):
-        userCompany = request.user.worksAtCompany_id
-        isManager = request.user.groups.filter(name='manager').exists()
+    def put(request, pk):
+        user_company = request.user.worksAtCompany_id
+        is_manager = request.user.groups.filter(name='manager').exists()
 
-        if isManager:
-            employee = get_object_or_404(Employee, worksAtCompany=userCompany, pk=pk)
+        if is_manager:
+            employee = get_object_or_404(Employee, worksAtCompany=user_company, pk=pk)
         if request.user.is_superuser:
             employee = get_object_or_404(Employee, pk=pk)
         serializer = EmployeeSerializer(employee, data=request.data)
@@ -177,11 +178,11 @@ class EmployeeDetail(APIView):
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
     @staticmethod
-    def delete(self, request, pk):
-        userCompany = request.user.worksAtCompany_id
-        isManager = request.user.groups.filter(name='manager').exists()
-        if isManager:
-            employee = get_object_or_404(Employee, worksAtCompany=userCompany, pk=pk)
+    def delete(request, pk):
+        user_company = request.user.worksAtCompany_id
+        is_manager = request.user.groups.filter(name='manager').exists()
+        if is_manager:
+            employee = get_object_or_404(Employee, worksAtCompany=user_company, pk=pk)
         if request.user.is_superuser:
             employee = get_object_or_404(Employee, pk=pk)
         if employee:
@@ -196,21 +197,23 @@ class WorkplaceList(APIView):
     """List all workplace."""
 
     @staticmethod
-    def get(self, request):
-        userCompany = request.user.worksAtCompany_id
+    def get(request):
         if request.user.is_superuser:
             workplaces = Workplace.objects.all()
         else:
-            workplaces = Workplace.objects.filter(worksAtCompany=userCompany)
-        workplaces = Workplace.objects.all()
+            user_company = request.user.worksAtCompany_id
+            if user_company is None:
+                return []
+            workplaces = Workplace.objects.filter(worksAtCompany=user_company)
+
         serializer = WorkplaceSerializer(workplaces, many=True)
         return Response(serializer.data)
 
     @staticmethod
-    def post(self, request):
-        isManager = request.user.groups.filter(name='manager').exists()
+    def post(request):
+        is_manager = request.user.groups.filter(name='manager').exists()
 
-        if request.user.is_superuser or isManager:
+        if request.user.is_superuser or is_manager:
             serializer = WorkplaceSerializer(data=request.data)
             if serializer.is_valid():
                 serializer.save()
@@ -220,27 +223,27 @@ class WorkplaceList(APIView):
 
 
 class WorkplaceDetail(APIView):
-    """Lists a Workplace."""
+    """Lists a Workplace Detail."""
 
     @staticmethod
-    def get(self, request, pk):
-        userCompany = request.user.worksAtCompany_id
+    def get(request, pk):
+        user_company = request.user.worksAtCompany_id
         if request.user.is_superuser:
             workplace = get_object_or_404(Workplace, pk=pk)
         else:
-            workplace = get_object_or_404(Workplace, company=userCompany, pk=pk)
+            workplace = get_object_or_404(Workplace, company=user_company, pk=pk)
         serializer = WorkplaceSerializer(workplace)
         return Response(serializer.data)
 
     @staticmethod
-    def put(self, request, pk):
-        userCompany = request.user.worksAtCompany_id
-        isManager = request.user.groups.filter(name='manager').exists()
-        if isManager:
+    def put(request, pk):
+        user_company = request.user.worksAtCompany_id
+        is_manager = request.user.groups.filter(name='manager').exists()
+        if is_manager:
             if request.user.is_superuser:
                 workplace = get_object_or_404(Workplace, pk=pk)
             else:
-                workplace = get_object_or_404(Workplace, company=userCompany, pk=pk)
+                workplace = get_object_or_404(Workplace, company=user_company, pk=pk)
             serializer = WorkplaceSerializer(workplace, data=request.data)
             if serializer.is_valid():
                 serializer.save()
@@ -249,15 +252,15 @@ class WorkplaceDetail(APIView):
         return Response(status.HTTP_401_UNAUTHORIZED)
 
     @staticmethod
-    def delete(self, request, pk):
-        userCompany = request.user.employee.worksAtCompany.id
-        isManager = request.user.groups.filter(name='manager').exists()
+    def delete(request, pk):
+        user_company = request.user.employee.worksAtCompany.id
+        is_manager = request.user.groups.filter(name='manager').exists()
 
-        if isManager:
+        if is_manager:
             if request.user.is_superuser:
                 workplace = get_object_or_404(Workplace, pk=pk)
             else:
-                workplace = get_object_or_404(Workplace, company=userCompany, pk=pk)
+                workplace = get_object_or_404(Workplace, company=user_company, pk=pk)
             if workplace:
                 workplace.delete()
             return Response({})
@@ -270,26 +273,26 @@ class CheckInList(APIView):
     """List all checkin."""
 
     @staticmethod
-    def get(self, request):
-        userCompany = request.user.worksAtCompany_id
-        isManager = request.user.groups.filter(name='manager').exists()
-        if isManager:
-            checkinList = CheckIn.objects.filter(workplace__company=userCompany)
+    def get(request):
+        user_company = request.user.worksAtCompany_id
+        is_manager = request.user.groups.filter(name='manager').exists()
+        if is_manager:
+            checkin_list = CheckIn.objects.filter(workplace__company=user_company)
         elif request.user.is_superuser:
-            checkinList = CheckIn.objects.all()
+            checkin_list = CheckIn.objects.all()
         else:
-            checkinList = CheckIn.objects.filter(workplace__company=userCompany, timeCard__employee=request.user)
-        serializer = CheckInSerializer(checkinList, many=True)
+            checkin_list = CheckIn.objects.filter(workplace__company=user_company, timeCard__employee=request.user)
+        serializer = CheckInSerializer(checkin_list, many=True)
         return Response(serializer.data)
 
     @staticmethod
-    def post(self, request):
+    def post(request):
         # save timeCard with
-        timeCard = TimeCard()
-        timeCard.employee = request.user
-        timeCard.save()
-        request.data["timeCard"] = timeCard.id
-        # add timeCard in dicionary
+        time_card = TimeCard()
+        time_card.employee = request.user
+        time_card.save()
+        request.data["timeCard"] = time_card.id
+        # add timeCard in dictionary
         serializer = CheckInSerializer(data=request.data)
         if serializer.is_valid():
             serializer.save()
@@ -298,32 +301,33 @@ class CheckInList(APIView):
 
 
 class CheckInDetail(APIView):
-    """Lists a CheckIn."""
+    """Lists a CheckIn Detail."""
 
     @staticmethod
-    def get(self, request, pk):
-        userCompany = request.user.worksAtCompany_id
-        isManager = request.user.groups.filter(name='manager').exists()
-        if isManager:
-            checkin = get_object_or_404(CheckIn, pk=pk, workplace__company=userCompany)
+    def get(request, pk):
+        user_company = request.user.worksAtCompany_id
+        is_manager = request.user.groups.filter(name='manager').exists()
+        if is_manager:
+            checkin = get_object_or_404(CheckIn, pk=pk, workplace__company=user_company)
         elif request.user.is_superuser:
             checkin = get_object_or_404(CheckIn, pk=pk)
         else:
-            checkin = get_object_or_404(CheckIn, workplace__company=userCompany, timeCard__employee=request.user, pk=pk)
+            checkin = get_object_or_404(CheckIn, workplace__company=user_company, timeCard__employee=request.user,
+                                        pk=pk)
         serializer = CheckInSerializer(checkin)
         return Response(serializer.data)
 
     @staticmethod
-    def put(self, request, pk):
-
-        userCompany = request.user.worksAtCompany_id
-        isManager = request.user.groups.filter(name='manager').exists()
-        if isManager:
-            checkin = get_object_or_404(CheckIn, pk=pk, workplace__company=userCompany)
+    def put(request, pk):
+        user_company = request.user.worksAtCompany_id
+        is_manager = request.user.groups.filter(name='manager').exists()
+        if is_manager:
+            checkin = get_object_or_404(CheckIn, pk=pk, workplace__company=user_company)
         elif request.user.is_superuser:
             checkin = get_object_or_404(CheckIn, pk=pk)
         else:
-            checkin = get_object_or_404(CheckIn, workplace__company=userCompany, timeCard__employee=request.user, pk=pk)
+            checkin = get_object_or_404(CheckIn, workplace__company=user_company, timeCard__employee=request.user,
+                                        pk=pk)
         serializer = CheckInSerializer(checkin, data=request.data)
         if serializer.is_valid():
             serializer.save()
@@ -331,15 +335,16 @@ class CheckInDetail(APIView):
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
     @staticmethod
-    def delete(self, request, pk):
-        userCompany = request.user.worksAtCompany_id
-        isManager = request.user.groups.filter(name='manager').exists()
-        if isManager:
-            checkin = get_object_or_404(CheckIn, pk=pk, workplace__company=userCompany)
+    def delete(request, pk):
+        user_company = request.user.worksAtCompany_id
+        is_manager = request.user.groups.filter(name='manager').exists()
+        if is_manager:
+            checkin = get_object_or_404(CheckIn, pk=pk, workplace__company=user_company)
         elif request.user.is_superuser:
             checkin = get_object_or_404(CheckIn, pk=pk)
         else:
-            checkin = get_object_or_404(CheckIn, workplace__company=userCompany, timeCard__employee=request.user, pk=pk)
+            checkin = get_object_or_404(CheckIn, workplace__company=user_company, timeCard__employee=request.user,
+                                        pk=pk)
         if checkin:
             checkin.delete()
             return Response({})
@@ -348,23 +353,23 @@ class CheckInDetail(APIView):
 # -------------------------------------- Checkin
 
 class CheckoutList(APIView):
-    """List all checkin."""
+    """List all checkout."""
 
     @staticmethod
-    def get(self, request):
-        userCompany = request.user.worksAtCompany_id
-        isManager = request.user.groups.filter(name='manager').exists()
-        if isManager:
-            checkoutList = CheckOut.objects.filter(workplace__company=userCompany)
+    def get(request):
+        user_company = request.user.worksAtCompany_id
+        is_manager = request.user.groups.filter(name='manager').exists()
+        if is_manager:
+            checkout_list = CheckOut.objects.filter(workplace__company=user_company)
         elif request.user.is_superuser:
-            checkoutList = CheckOut.objects.all()
+            checkout_list = CheckOut.objects.all()
         else:
-            checkoutList = CheckOut.objects.filter(workplace__company=userCompany, timeCard__employee=request.user)
-        serializer = CheckOutSerializer(checkoutList, many=True)
+            checkout_list = CheckOut.objects.filter(workplace__company=user_company, timeCard__employee=request.user)
+        serializer = CheckOutSerializer(checkout_list, many=True)
         return Response(serializer.data)
 
     @staticmethod
-    def post(self, request):
+    def post(request):
         # get checkin timecard
         timecard = TimeCard.objects.filter(employee=request.user).last()
         if not timecard:
@@ -382,32 +387,32 @@ class CheckoutList(APIView):
 
 
 class CheckOutDetail(APIView):
-    """Lists a CheckOut."""
+    """Lists a CheckOut Detail."""
 
     @staticmethod
-    def get(self, request, pk):
-        userCompany = request.user.worksAtCompany_id
-        isManager = request.user.groups.filter(name='manager').exists()
-        if isManager:
-            checkout = get_object_or_404(CheckOut, workplace__company=userCompany, pk=pk)
+    def get(request, pk):
+        user_company = request.user.worksAtCompany_id
+        is_manager = request.user.groups.filter(name='manager').exists()
+        if is_manager:
+            checkout = get_object_or_404(CheckOut, workplace__company=user_company, pk=pk)
+        else:
+            checkout = get_object_or_404(CheckOut, workplace__company=user_company, timeCard__employee=request.user,
+                                         pk=pk)
         if request.user.is_superuser:
             checkout = get_object_or_404(CheckOut, pk=pk)
-        else:
-            checkout = get_object_or_404(CheckOut, workplace__company=userCompany, timeCard__employee=request.user,
-                                         pk=pk)
         serializer = CheckOutSerializer(checkout)
         return Response(serializer.data)
 
     @staticmethod
-    def put(self, request, pk):
-        userCompany = request.user.worksAtCompany_id
-        isManager = request.user.groups.filter(name='manager').exists()
-        if isManager:
-            checkout = get_object_or_404(CheckOut, workplace__company=userCompany, pk=pk)
+    def put(request, pk):
+        user_company = request.user.worksAtCompany_id
+        is_manager = request.user.groups.filter(name='manager').exists()
+        if is_manager:
+            checkout = get_object_or_404(CheckOut, workplace__company=user_company, pk=pk)
         if request.user.is_superuser:
             checkout = get_object_or_404(CheckOut, pk=pk)
         else:
-            checkout = get_object_or_404(CheckOut, workplace__company=userCompany, timeCard__employee=request.user,
+            checkout = get_object_or_404(CheckOut, workplace__company=user_company, timeCard__employee=request.user,
                                          pk=pk)
         serializer = CheckOutSerializer(checkout, data=request.data)
         if serializer.is_valid():
@@ -416,16 +421,16 @@ class CheckOutDetail(APIView):
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
     @staticmethod
-    def delete(self, request, pk):
-        userCompany = request.user.worksAtCompany_id
-        isManager = request.user.groups.filter(name='manager').exists()
-        if isManager:
-            checkout = get_object_or_404(CheckOut, workplace__company=userCompany, pk=pk)
+    def delete(request, pk):
+        user_company = request.user.worksAtCompany_id
+        is_manager = request.user.groups.filter(name='manager').exists()
         if request.user.is_superuser:
             checkout = get_object_or_404(CheckOut, pk=pk)
         else:
-            checkout = get_object_or_404(CheckOut, workplace__company=userCompany, timeCard__employee=request.user,
+            checkout = get_object_or_404(CheckOut, workplace__company=user_company, timeCard__employee=request.user,
                                          pk=pk)
+        if is_manager:
+            checkout = get_object_or_404(CheckOut, workplace__company=user_company, pk=pk)
         if checkout:
             checkout.delete()
             return Response({})
@@ -437,20 +442,20 @@ class TimeCardList(APIView):
     """List all timeCard."""
 
     @staticmethod
-    def get(self, request):
-        userCompany = request.user.worksAtCompany_id
-        isManager = request.user.groups.filter(name='manager').exists()
-        if isManager:
-            timeCards = TimeCard.objects.filter(checkIn__workplace__company=userCompany)
+    def get(request):
+        user_company = request.user.worksAtCompany_id
+        is_manager = request.user.groups.filter(name='manager').exists()
         if request.user.is_superuser:
-            timeCards = TimeCard.objects.all()
+            time_cards = TimeCard.objects.all()
         else:
-            timeCards = TimeCard.objects.filter(checkIn__workplace__company=userCompany, employee=request.user)
-        serializer = TimeCardSerializer(timeCards, many=True)
+            time_cards = TimeCard.objects.filter(checkIn__workplace__company=user_company, employee=request.user)
+        if is_manager:
+            time_cards = TimeCard.objects.filter(checkIn__workplace__company=user_company)
+        serializer = TimeCardSerializer(time_cards, many=True)
         return Response(serializer.data)
 
     @staticmethod
-    def post(self, request):
+    def post(request):
         serializer = TimeCardSerializer(data=request.data)
         if serializer.is_valid():
             serializer.save()
@@ -459,33 +464,33 @@ class TimeCardList(APIView):
 
 
 class TimeCardDetail(APIView):
-    """Lists a timeCard."""
+    """Lists a timeCard Detail."""
 
     @staticmethod
-    def get(self, request, pk):
-        userCompany = request.user.worksAtCompany_id
-        isManager = request.user.groups.filter(name='manager').exists()
-        if isManager:
-            timecard = get_object_or_404(TimeCard, checkIn__workplace__company=userCompany, pk=pk)
+    def get(request, pk):
+        user_company = request.user.worksAtCompany_id
+        is_manager = request.user.groups.filter(name='manager').exists()
         if request.user.is_superuser:
             timecard = get_object_or_404(TimeCard, pk=pk)
         else:
-            timeCards = get_object_or_404(TimeCard, checkIn__workplace__company=userCompany, employee=request.user,
-                                          pk=pk)
+            timecard = get_object_or_404(TimeCard, checkIn__workplace__company=user_company, employee=request.user,
+                                         pk=pk)
+        if is_manager:
+            timecard = get_object_or_404(TimeCard, checkIn__workplace__company=user_company, pk=pk)
         serializer = TimeCardSerializer(timecard, many=False)
         return Response(serializer.data)
 
     @staticmethod
-    def put(self, request, pk):
-        userCompany = request.user.worksAtCompany_id
-        isManager = request.user.groups.filter(name='manager').exists()
-        if isManager:
-            timecard = get_object_or_404(TimeCard, checkIn__workplace__company=userCompany, pk=pk)
+    def put(request, pk):
+        user_company = request.user.worksAtCompany_id
+        is_manager = request.user.groups.filter(name='manager').exists()
         if request.user.is_superuser:
             timecard = get_object_or_404(TimeCard, pk=pk)
         else:
-            timeCards = get_object_or_404(TimeCard, checkIn__workplace__company=userCompany, employee=request.user,
-                                          pk=pk)
+            timecard = get_object_or_404(TimeCard, checkIn__workplace__company=user_company, employee=request.user,
+                                         pk=pk)
+        if is_manager:
+            timecard = get_object_or_404(TimeCard, checkIn__workplace__company=user_company, pk=pk)
         serializer = TimeCardSerializer(timecard, data=request.data)
         if serializer.is_valid():
             serializer.save()
@@ -493,16 +498,16 @@ class TimeCardDetail(APIView):
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
     @staticmethod
-    def delete(self, request, pk):
-        userCompany = request.user.worksAtCompany_id
-        isManager = request.user.groups.filter(name='manager').exists()
-        if isManager:
-            timecard = get_object_or_404(TimeCard, checkIn__workplace__company=userCompany, pk=pk)
+    def delete(request, pk):
+        user_company = request.user.worksAtCompany_id
+        is_manager = request.user.groups.filter(name='manager').exists()
         if request.user.is_superuser:
             timecard = get_object_or_404(TimeCard, pk=pk)
         else:
-            timeCards = get_object_or_404(TimeCard, checkIn__workplace__company=userCompany, employee=request.user,
-                                          pk=pk)
+            timecard = get_object_or_404(TimeCard, checkIn__workplace__company=user_company, employee=request.user,
+                                         pk=pk)
+        if is_manager:
+            timecard = get_object_or_404(TimeCard, checkIn__workplace__company=user_company, pk=pk)
         if timecard:
             timecard.delete()
             return Response({})
