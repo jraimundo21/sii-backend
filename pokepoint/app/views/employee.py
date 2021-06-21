@@ -1,8 +1,8 @@
 from django.shortcuts import get_object_or_404
 from rest_framework.views import APIView, Response, status
 
-from pokepoint.app.models import Employee
-from pokepoint.app.serializers import EmployeeSerializer
+from ..models import Employee
+from ..serializers import EmployeeSerializer
 from rest_framework.authtoken.models import Token
 
 
