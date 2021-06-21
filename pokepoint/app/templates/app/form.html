@@ -1,22 +1,22 @@
 {% extends "app/layout/layout.html" %}
 
 {% block content %}
-        {% load crispy_forms_tags %}
-          <main class="col-md-9 ms-sm-auto col-lg-10 px-md-4">
-              <div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom">
-                <h1 class="h2">{{pageName}}</h1>
-              </div>
-              <div class="col-8">
-              <form action="" method="POST">
-                {% csrf_token %}
-                  {% for field in form %}
-                    {% if field.label != 'Company' %}
-                       {{field|as_crispy_field}}
-                     {%endif%}
-                  {% endfor %}
-                 <br>
-                <button type="submit" class="btn btn-success">Save</button>
-              </form>
-              </div>
-        </main>
+{% load crispy_forms_tags %}
+<main class="col-md-9 ms-sm-auto col-lg-10 px-md-4">
+    <div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom">
+        <h1 class="h2">{{pageName}}</h1>
+    </div>
+    <div class="col-8">
+        <form action="" method="POST">
+            {% csrf_token %}
+            {% for field in form %}
+            {% if field.label != 'Company' %}
+            {{field|as_crispy_field}}
+            {%endif%}
+            {% endfor %}
+            <br>
+            <button type="submit" class="btn btn-success">Save</button>
+        </form>
+    </div>
+</main>
 {% endblock content %}

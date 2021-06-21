@@ -7,7 +7,7 @@ from rest_framework.authtoken.serializers import AuthTokenSerializer
 from rest_framework.views import APIView, Response, status
 
 from rest_framework.authtoken.models import Token
-from pokepoint.app.serializers import EmployeeSerializer
+from ..serializers import EmployeeSerializer
 
 
 # ========== api

@@ -1,10 +1,12 @@
 from django.conf import settings
 from django.db import models
 from django.contrib.auth.models import AbstractBaseUser, BaseUserManager, PermissionsMixin
+
+
 # Create your models here.
 
 class EmployeeManager(BaseUserManager):
-    def create_user(self, email, username, password=None, **extra_fields):
+    def create_user(self, email, username, password=None):
         if not email:
             raise ValueError('Users must have an email address')
         if not username:
@@ -19,7 +21,7 @@ class EmployeeManager(BaseUserManager):
         user.save(using=self._db)
         return user
 
-    def create_superuser(self, email, username, password, **extra_fields):
+    def create_superuser(self, email, username, password):
         user = self.create_user(
             email=self.normalize_email(email),
             password=password,

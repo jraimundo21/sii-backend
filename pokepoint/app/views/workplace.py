@@ -3,8 +3,8 @@ from django.contrib.auth import login, logout
 from django.shortcuts import get_object_or_404
 from rest_framework.views import APIView, Response, status
 
-from pokepoint.app.models import Workplace
-from pokepoint.app.serializers import WorkplaceSerializer
+from ..models import Workplace
+from ..serializers import WorkplaceSerializer
 
 
 # -------------------------------------- Workplace

@@ -1,8 +1,8 @@
 from django.shortcuts import get_object_or_404
 from rest_framework.views import APIView, Response, status
 
-from pokepoint.app.models import TimeCard, CheckOut
-from pokepoint.app.serializers import TimeCardSerializer, CheckOutSerializer
+from ..models import TimeCard, CheckOut
+from ..serializers import TimeCardSerializer, CheckOutSerializer
 
 
 # -------------------------------------- Checkout

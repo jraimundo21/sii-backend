@@ -1,8 +1,8 @@
 from django.shortcuts import get_object_or_404
 from rest_framework.views import APIView, Response, status
 
-from pokepoint.app.models import Company
-from pokepoint.app.serializers import CompanySerializer
+from ..models import Company
+from ..serializers import CompanySerializer
 
 
 # -------------------------------------- Company
