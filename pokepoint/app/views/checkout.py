@@ -11,7 +11,7 @@ class CheckoutList(APIView):
     """List all checkout."""
 
     @staticmethod
-    def get(request):
+    def get(request, pk):
         user_company = request.user.worksAtCompany_id
         is_manager = request.user.groups.filter(name='manager').exists()
         if is_manager:
@@ -24,9 +24,9 @@ class CheckoutList(APIView):
         return Response(serializer.data)
 
     @staticmethod
-    def post(request):
+    def post(request, pk):
         # get checkin timecard
-        timecard = TimeCard.objects.filter(employee=request.user).last()
+        timecard = TimeCard.objects.filter(employee=pk).last()
         if not timecard:
             return Response(status.HTTP_401_UNAUTHORIZED)
         tc_serialize = TimeCardSerializer(timecard)
@@ -57,23 +57,6 @@ class CheckOutDetail(APIView):
             checkout = get_object_or_404(CheckOut, pk=pk)
         serializer = CheckOutSerializer(checkout)
         return Response(serializer.data)
-
-    @staticmethod
-    def put(request, pk):
-        user_company = request.user.worksAtCompany_id
-        is_manager = request.user.groups.filter(name='manager').exists()
-        if is_manager:
-            checkout = get_object_or_404(CheckOut, workplace__company=user_company, pk=pk)
-        if request.user.is_superuser:
-            checkout = get_object_or_404(CheckOut, pk=pk)
-        else:
-            checkout = get_object_or_404(CheckOut, workplace__company=user_company, timeCard__employee=request.user,
-                                         pk=pk)
-        serializer = CheckOutSerializer(checkout, data=request.data)
-        if serializer.is_valid():
-            serializer.save()
-            return Response(serializer.data)
-        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
     @staticmethod
     def delete(request, pk):

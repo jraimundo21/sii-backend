@@ -3,7 +3,7 @@ from django.contrib.auth import login, logout
 from django.shortcuts import get_object_or_404
 from rest_framework.views import APIView, Response, status
 
-from ..models import Workplace
+from ..models import Workplace, Company
 from ..serializers import WorkplaceSerializer
 
 
@@ -13,26 +13,19 @@ class WorkplaceList(APIView):
     """List all workplace."""
 
     @staticmethod
-    def get(request):
-        if request.user.is_superuser:
-            workplaces = Workplace.objects.all()
-        else:
-            user_company = request.user.worksAtCompany_id
-            if user_company is None:
-                return []
-            workplaces = Workplace.objects.filter(worksAtCompany=user_company)
-
-        serializer = WorkplaceSerializer(workplaces, many=True)
+    def get(request, pk):
+        company = get_object_or_404(Company, pk=pk)
+        serializer = WorkplaceSerializer(company.workplaces, many=True)
         return Response(serializer.data)
 
     @staticmethod
-    def post(request):
+    def post(request, pk):
         is_manager = request.user.groups.filter(name='manager').exists()
-
-        if request.user.is_superuser or is_manager:
+        if is_manager:
+            company = get_object_or_404(Company, pk=pk)
             serializer = WorkplaceSerializer(data=request.data)
             if serializer.is_valid():
-                serializer.save()
+                serializer.save(company=company)
                 return Response(serializer.data, status=status.HTTP_201_CREATED)
             return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
         return Response(status.HTTP_401_UNAUTHORIZED)
@@ -44,10 +37,7 @@ class WorkplaceDetail(APIView):
     @staticmethod
     def get(request, pk):
         user_company = request.user.worksAtCompany_id
-        if request.user.is_superuser:
-            workplace = get_object_or_404(Workplace, pk=pk)
-        else:
-            workplace = get_object_or_404(Workplace, company=user_company, pk=pk)
+        workplace = get_object_or_404(Workplace, company=user_company, pk=pk)
         serializer = WorkplaceSerializer(workplace)
         return Response(serializer.data)
 
@@ -56,10 +46,7 @@ class WorkplaceDetail(APIView):
         user_company = request.user.worksAtCompany_id
         is_manager = request.user.groups.filter(name='manager').exists()
         if is_manager:
-            if request.user.is_superuser:
-                workplace = get_object_or_404(Workplace, pk=pk)
-            else:
-                workplace = get_object_or_404(Workplace, company=user_company, pk=pk)
+            workplace = get_object_or_404(Workplace, company=user_company, pk=pk)
             serializer = WorkplaceSerializer(workplace, data=request.data)
             if serializer.is_valid():
                 serializer.save()
@@ -71,13 +58,9 @@ class WorkplaceDetail(APIView):
     def delete(request, pk):
         user_company = request.user.employee.worksAtCompany.id
         is_manager = request.user.groups.filter(name='manager').exists()
-
         if is_manager:
-            if request.user.is_superuser:
-                workplace = get_object_or_404(Workplace, pk=pk)
-            else:
-                workplace = get_object_or_404(Workplace, company=user_company, pk=pk)
+            workplace = get_object_or_404(Workplace, company=user_company, pk=pk)
             if workplace:
                 workplace.delete()
-            return Response({})
+                return Response({})
         return Response(status.HTTP_401_UNAUTHORIZED)

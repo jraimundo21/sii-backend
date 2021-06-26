@@ -1,4 +1,5 @@
 from django.contrib.auth import login, logout
+from django.core.exceptions import ObjectDoesNotExist
 
 from django.shortcuts import \
     redirect
@@ -27,9 +28,9 @@ class LoginApi(APIView):
 class LogoutUser(APIView):
 
     @staticmethod
-    def post(request):
+    def post(self, request):
         logout(request)
-        return redirect('api_login')
+        return Response(status=status.HTTP_200_OK)
 
 
 class RegisterApi(APIView):

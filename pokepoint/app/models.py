@@ -48,7 +48,7 @@ class Employee(AbstractBaseUser, PermissionsMixin):
     nif = models.CharField(max_length=9, blank=True, null=True)
     address = models.CharField(max_length=100, blank=True, null=True)
     phone = models.CharField(max_length=20, blank=True, null=True)
-    worksAtCompany = models.ForeignKey('Company', on_delete=models.DO_NOTHING, blank=True, null=True)
+    worksAtCompany = models.ForeignKey('Company', on_delete=models.DO_NOTHING, blank=True, null=True, related_name='employees')
 
     USERNAME_FIELD = 'email'
     REQUIRED_FIELDS = ['username']
@@ -77,7 +77,7 @@ class Company(models.Model):
 
 
 class Workplace(models.Model):
-    company = models.ForeignKey(Company, on_delete=models.CASCADE)
+    company = models.ForeignKey(Company, on_delete=models.CASCADE, related_name='workplaces')
     name = models.CharField(max_length=100)
     latitude = models.CharField(max_length=100, null=True)
     longitude = models.CharField(max_length=100, null=True)
@@ -95,11 +95,11 @@ class TimeCard(models.Model):
 class CheckIn(models.Model):
     workplace = models.ForeignKey(Workplace, on_delete=models.DO_NOTHING)
     checkInType = models.ForeignKey(CheckInType, on_delete=models.DO_NOTHING)
-    timeCard = models.ForeignKey(TimeCard, on_delete=models.DO_NOTHING, related_name='checkIn')
+    timeCard = models.OneToOneField(TimeCard, on_delete=models.DO_NOTHING, related_name='checkIn')
     timestamp = models.DateTimeField("time of checkin")
 
 
 class CheckOut(models.Model):
     workplace = models.ForeignKey(Workplace, on_delete=models.DO_NOTHING)
-    timeCard = models.ForeignKey(TimeCard, on_delete=models.DO_NOTHING, related_name='checkOut')
+    timeCard = models.OneToOneField(TimeCard, on_delete=models.DO_NOTHING, related_name='checkOut')
     timestamp = models.DateTimeField("time of checkout")

@@ -1,4 +1,7 @@
+from datetime import datetime
+
 from rest_framework import serializers
+from rest_framework.response import Response
 
 from .models import Employee, Company, Workplace, TimeCard, CheckIn, CheckOut
 from django.contrib.auth.models import Group
@@ -15,10 +18,6 @@ class CheckOutSerializer(serializers.ModelSerializer):
         model = CheckOut
         fields = ['id', 'workplace', 'timeCard', 'timestamp']
 
-        @staticmethod
-        def create(validated_data):
-            return CheckOut.objects.create(**validated_data)
-
 
 class WorkplaceSerializer(serializers.ModelSerializer):
     class Meta:
@@ -27,18 +26,28 @@ class WorkplaceSerializer(serializers.ModelSerializer):
 
 
 class TimeCardSerializer(serializers.ModelSerializer):
-    checkIn = CheckInSerializer(many=True, read_only=True)
-    checkOut = CheckOutSerializer(many=True, read_only=True)
+    checkIn = CheckInSerializer(read_only=True)
+    checkOut = CheckOutSerializer(read_only=True)
+    time_work = serializers.SerializerMethodField()
 
     class Meta:
         model = TimeCard
-        fields = ['id', 'checkIn', 'checkOut', 'employee']
+        fields = ['id', 'checkIn', 'checkOut', 'employee', 'time_work']
 
         @staticmethod
         def update(time_card, validated_data):
             time_card.employee = validated_data.get('employee', time_card.employee)
             time_card.save()
             return time_card
+
+    def get_time_work(self, instance):
+        if hasattr(instance,'checkOut'):
+            check_in_time = f'{instance.checkIn.timestamp}'
+            check_out_time = f'{instance.checkOut.timestamp}'
+            f = '%Y-%m-%d %H:%M:%S'
+            dif = ((datetime.strptime(check_out_time[0:19], f)-datetime.strptime(check_in_time[0:19], f)).total_seconds()*1000)
+            return dif
+        return 0
 
 
 class GroupSerializer(serializers.ModelSerializer):
@@ -48,17 +57,15 @@ class GroupSerializer(serializers.ModelSerializer):
 
 
 class EmployeeSerializer(serializers.ModelSerializer):
-    timeCards = TimeCardSerializer(many=True, read_only=True)
-
-    # groups = GroupSerializer(many=True)
 
     class Meta:
         model = Employee
-        fields = ['username', 'email', 'name', 'nif', 'address', 'phone', 'worksAtCompany', 'timeCards']
+        fields = ['username', 'email', 'name', 'nif', 'address', 'phone', 'worksAtCompany']#, 'worksAtCompany']
 
 
 class CompanySerializer(serializers.ModelSerializer):
-    # employees = EmployeeSerializer(many=True, read_only=True)
+    # employees = Employ
+    # eeSerializer(many=True, read_only=True)
     # manager = ManagerSerializer(many=True, read_only=True)
 
     class Meta:
