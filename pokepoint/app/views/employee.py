@@ -22,13 +22,10 @@ class EmployeeList(APIView):
         is_manager = request.user.groups.filter(name='manager').exists()
         company = get_object_or_404(Company, pk=pk)
         if is_manager:
-            print('---------------------------------------falze')
-            print('-------+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++--------------------------------falze')
-            print(request.data)
             serializer = EmployeeSerializer(data=request.data)
             if serializer.is_valid():
                 print('---------------------ver---------')
-                employee = serializer.save(company=company)
+                employee = serializer.save(worksAtCompany=company)
                 employee.set_password(employee.password)
                 employee.save()
                 Token.objects.create(user=employee)
