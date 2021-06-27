@@ -34,7 +34,6 @@
                 <td>{{ checkout.timestamp|date:"h:i" }}</td>
 
                 <td>
-                    <a type="button" class="btn btn-sm btn-secondary" href="{% url 'checkout' checkout.id %}">Edit</a>
                     <a type="button" class="btn btn-sm btn-secondary" href="{% url 'delete_checkout' checkout.id %}">Delete</a>
                 </td>
 

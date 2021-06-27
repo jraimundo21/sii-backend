@@ -36,7 +36,6 @@
                 <td>{{ checkin.timestamp|date:"h:i" }}</td>
 
                 <td>
-                    <a type="button" class="btn btn-sm btn-secondary" href="{% url 'checkin' checkin.id %}">Edit</a>
                     <a type="button" class="btn btn-sm btn-secondary" href="{% url 'delete_checkin' checkin.id %}">Delete</a>
                 </td>
             </tr>

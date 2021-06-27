@@ -1,17 +1,25 @@
+from datetime import datetime
+
 from django.shortcuts import render, get_object_or_404, \
     redirect
 
-from ..models import Company
+from ..models import Company, Employee, TimeCard, CheckIn, CheckOut
 from django.contrib.auth.decorators import login_required
 from ..forms import CompanyForm
 from django.contrib import messages
 
 
 # _________________________________________________________________Companies
+from ..serializers import TimeCardSerializer
+
+
 @login_required(login_url='login')
 def index(request):
+    user_company = request.user.worksAtCompany_id
+    company = Company.objects.get(id=user_company)
+    data = {'company': company}
     template_name = 'app/index.html'
-    return render(request, template_name)
+    return render(request, template_name, data)
 
 
 @login_required(login_url='login')
@@ -29,7 +37,7 @@ def addCompany(request):
         if form.is_valid():
             form.save()
             messages.success(request, 'New comany ')
-            return redirect('list_company')
+            return redirect('index')
     return render(request, template_name, {'form': form})
 
 
@@ -43,13 +51,13 @@ def editCompany(request, pk):
         if form.is_valid():
             form.save()
             messages.success(request, 'Edited comany ')
-            return redirect('list_company')
-    return render(request, template_name, {'form': form, 'pageName': 'Workplace'})
+            return redirect('index')
+    return render(request, template_name, {'form': form, 'pageName': 'Company'})
 
 
 @login_required(login_url='login')
 def deleteCompany(request, pk):
     company = get_object_or_404(Company, pk=pk)
     company.delete()
-    messages.success(request, 'deleted  comany ')
-    return redirect('list_company')
+    messages.success(request, 'deleted  Company')
+    return redirect('index')

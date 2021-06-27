@@ -88,6 +88,9 @@ body {
   border-width: 0;
   border-radius: 0;
 }
+.bg {
+  background-color: #11443C;
+}
 
 .form-control-dark {
   color: #fff;

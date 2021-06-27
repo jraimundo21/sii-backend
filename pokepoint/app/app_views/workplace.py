@@ -10,10 +10,11 @@ from django.contrib import messages
 # -------------------------------------- Workplace
 @login_required(login_url='login')
 def listWorkplace(request):
+    is_manager = request.user.groups.filter(name='manager').exists()
     user_company = request.user.worksAtCompany_id
     workplaces = Workplace.objects.filter(company=user_company)
     template_name = 'app/workplace.html'
-    return render(request, template_name, {'workplaces': workplaces})
+    return render(request, template_name, {'workplaces': workplaces, 'ismanager':is_manager})
 
 
 @login_required(login_url='login')

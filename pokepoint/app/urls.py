@@ -18,7 +18,7 @@ urlpatterns = [
     # ------- Company
     path('companies/', listCompany, name='list_company'),
     path('add/company/', addCompany, name='add_company'),
-    path('edit/company/<int:pk>/', editCompany, name='company'),
+    path('edit/company/<int:pk>/', editCompany, name='edit_company'),
     path('delete/company/<int:pk>/', deleteCompany, name='delete_company'),
     # ------- TimeCard
     # path('timecards/', app_views.listTimecard, name='list_timecard'),
@@ -33,12 +33,10 @@ urlpatterns = [
     # ------- checkIn
     path('checkins/', listCheckin, name='list_checkin'),
     path('add/checkin/', addCheckin, name='add_checkin'),
-    path('edit/checkin/<int:pk>/', editCheckin, name='checkin'),
     path('delete/checkin/<int:pk>/', deleteCheckin, name='delete_checkin'),
     # ------- checkOut
     path('checkouts/', listCheckout, name='list_checkout'),
     path('add/checkout/', addCheckout, name='add_checkout'),
-    path('edit/checkout/<int:pk>/', editCheckout, name='checkout'),
     path('delete/checkout/<int:pk>/', deleteCheckout, name='delete_checkout'),
 
     # ================Api===================

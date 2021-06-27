@@ -4,26 +4,21 @@
 <main class="col-md-9 ms-sm-auto col-lg-10 px-md-4">
     <div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom">
         <h1 class="h2">Company </h1>
-        <div class="btn-toolbar mb-2 mb-md-0">
-            <div class="btn-group me-2">
-                <button type="button" class="btn btn-sm btn-outline-secondary">Share</button>
-                <button type="button" class="btn btn-sm btn-outline-secondary">Export</button>
-            </div>
-            <button type="button" class="btn btn-sm btn-outline-secondary dropdown-toggle">
-                <span data-feather="calendar"></span>
-                This week
-            </button>
-        </div>
     </div>
-    <div class="row row-cols-1 row-cols-md-3 g-4">
-        <div class="col">
+    <div class="row ">
+        <div class="col cols-md-3 g-4">
             <div class="card">
                 <div class="card-body">
-                    <h2 class="card-title">Employee</h2>
-                    <h1 class="card-title">{{employee.id}} {{request.user.id}}</h1>
+                    <h2 class="card-title">My company</h2>
+                    <p> Name: {{company.name}}</p>
+                    <p> Address:{{company.address}}</p>
+                    <p> Nif: {{company.nif}} </p>
+                    <p> Phone: {{company.phone}}</p>
+                    <a type="button" class="btn btn-sm btn-secondary" href="{% url 'edit_company' company.id %}">Edit</a>
                 </div>
             </div>
         </div>
+
     </div>
 </main>
 {% endblock content %}

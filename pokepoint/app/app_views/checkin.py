@@ -34,25 +34,6 @@ def addCheckin(request):
 
 
 @login_required(login_url='login')
-def editCheckin(request, pk):
-    checkin = CheckIn.objects.filter(id=pk, timeCard__employee=request.user)
-    is_manager = request.user.groups.filter(name='manager').exists()
-    if is_manager or checkin:
-        form = CheckinForm(instance=checkin)
-        template_name = 'app/form.html'
-        page_name = 'Add Checkin'
-        if request.method == 'POST':
-            form = CheckinForm(request.POST, instance=checkin)
-            if form.is_valid():
-                form.save()
-                messages.success(request, 'Check-in Edited')
-                return redirect('list_checkin')
-        return render(request, template_name, {'form': form, 'pageName': page_name})
-    messages.error(request, 'Não tem permissão para aceder a pagina')
-    return redirect('list_checkin')
-
-
-@login_required(login_url='login')
 def deleteCheckin(request, pk):
     is_manager = request.user.groups.filter(name='manager').exists()
     if is_manager:

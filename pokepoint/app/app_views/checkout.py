@@ -34,25 +34,6 @@ def addCheckout(request):
 
 
 @login_required(login_url='login')
-def editCheckout(request, pk):
-    checkin = check_out = CheckOut.objects.filter(id=pk, timeCard__employee=request.user)
-    is_manager = request.user.groups.filter(name='manager').exists()
-    if is_manager or checkin:
-        form = CheckOutForm(instance=check_out)
-        template_name = 'app/form.html'
-        page_name = 'Edit Checkin'
-        if request.method == 'POST':
-            form = CheckOutForm(request.POST, instance=check_out)
-            if form.is_valid():
-                form.save()
-                messages.success(request, 'Check-out Edited')
-                return redirect('list_checkOut')
-        return render(request, template_name, {'form': form, 'pageName': page_name})
-    messages.error(request, 'Não tem permissão para aceder a pagina')
-    return redirect('list_checkin')
-
-
-@login_required(login_url='login')
 def deleteCheckout(request, pk):
     is_manager = request.user.groups.filter(name='manager').exists()
     if is_manager:

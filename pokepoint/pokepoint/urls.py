@@ -21,4 +21,5 @@ urlpatterns = [
     path('admin/', admin.site.urls),
     path('pokepoint/', include('app.urls')),
     path('', include('django.contrib.auth.urls')),
+    path('', RedirectView.as_view(pattern_name='login', permanent=False))
 ]
