@@ -6,5 +6,7 @@ from django.contrib.auth import logout
 # _______Login
 
 def logoutUser(request):
+    print('------------OKEYY---------')
     logout(request)
-    return redirect('login')
+    print('---------------------')
+    return redirect('index')

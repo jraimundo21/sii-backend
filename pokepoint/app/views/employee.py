@@ -24,7 +24,6 @@ class EmployeeList(APIView):
         if is_manager:
             serializer = EmployeeSerializer(data=request.data)
             if serializer.is_valid():
-                print('---------------------ver---------')
                 employee = serializer.save(worksAtCompany=company)
                 employee.set_password(employee.password)
                 employee.save()

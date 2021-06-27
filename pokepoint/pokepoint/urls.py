@@ -20,5 +20,5 @@ from django.views.generic.base import RedirectView
 urlpatterns = [
     path('admin/', admin.site.urls),
     path('pokepoint/', include('app.urls')),
-    path('', RedirectView.as_view(pattern_name='login', permanent=False))
+    path('', include('django.contrib.auth.urls')),
 ]

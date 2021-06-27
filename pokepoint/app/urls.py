@@ -6,15 +6,15 @@ from .views import *
 urlpatterns = [
 
     # ------- Auth
-    path('', include('django.contrib.auth.urls')),
-    path('logout/', logoutUser, name='logout_user'),
+    #path('', include('django.contrib.auth.urls')),
+    path('logouts/', logoutUser, name='logout_user'),
     path('index', index, name='index'),
 
     # ----------Employee
     path('employees/', listEmployee, name='list_employee'),
-    path('add/employee/', addEmployee, name='add_employee'),
-    path('edit/employee/<int:pk>/', editEmployee, name='employee'),
-    path('delete/employee/<int:pk>/', deleteEmployee, name='delete_employee'),
+    path('add/employees/', addEmployee, name='add_employee'),
+    path('edit/employees/<int:pk>/', editEmployee, name='employee'),
+    path('delete/employees/<int:pk>/', deleteEmployee, name='delete_employee'),
     # ------- Company
     path('companies/', listCompany, name='list_company'),
     path('add/company/', addCompany, name='add_company'),
