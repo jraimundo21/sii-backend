@@ -22,7 +22,7 @@ class CheckOutSerializer(serializers.ModelSerializer):
 class WorkplaceSerializer(serializers.ModelSerializer):
     class Meta:
         model = Workplace
-        fields = ['id', 'company_id', 'address', 'name']
+        fields = ['id', 'company_id', 'address', 'latitude', 'longitude', 'name']
 
 
 class TimeCardSerializer(serializers.ModelSerializer):
