@@ -45,7 +45,7 @@ class TimeCardSerializer(serializers.ModelSerializer):
             check_in_time = f'{instance.checkIn.timestamp}'
             check_out_time = f'{instance.checkOut.timestamp}'
             f = '%Y-%m-%d %H:%M:%S'
-            dif = ((datetime.strptime(check_out_time[0:19], f)-datetime.strptime(check_in_time[0:19], f)).total_seconds()*1000)
+            dif = int(((datetime.strptime(check_out_time[0:19], f)-datetime.strptime(check_in_time[0:19], f)).total_seconds()*1000))
             return dif
         return 0
 
