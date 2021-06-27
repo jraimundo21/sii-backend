@@ -1,8 +1,8 @@
 from django.shortcuts import get_object_or_404
 from rest_framework.views import APIView, Response, status
 
-from ..models import Employee
-from ..serializers import EmployeeSerializer
+from ..models import Employee, Company
+from ..serializers import EmployeeSerializer, EmployeeTimeCardSerializer
 from rest_framework.authtoken.models import Token
 
 
@@ -12,22 +12,19 @@ class EmployeeList(APIView):
     """List all employee."""
 
     @staticmethod
-    def get(request):
-        user_company = request.user.worksAtCompany_id
-        if request.user.is_superuser:
-            employees = Employee.objects.all()
-        else:
-            employees = Employee.objects.filter(worksAtCompany=user_company)
-        serializer = EmployeeSerializer(employees, many=True)
+    def get(request, pk):
+        company = get_object_or_404(Company, pk=pk)
+        serializer = EmployeeSerializer(company.employees, many=True)
         return Response(serializer.data)
 
     @staticmethod
-    def post(request):
+    def post(request, pk):
         is_manager = request.user.groups.filter(name='manager').exists()
-        if is_manager or request.user.is_superuser:
+        company = get_object_or_404(Company, pk=pk)
+        if is_manager:
             serializer = EmployeeSerializer(data=request.data)
             if serializer.is_valid():
-                employee = serializer.save()
+                employee = serializer.save(worksAtCompany=company)
                 employee.set_password(employee.password)
                 employee.save()
                 Token.objects.create(user=employee)
@@ -42,22 +39,14 @@ class EmployeeDetail(APIView):
     @staticmethod
     def get(request, pk):
         user_company = request.user.worksAtCompany_id
-        if request.user.is_superuser:
-            employee = get_object_or_404(Employee, pk=pk)
-        else:
-            employee = get_object_or_404(Employee, worksAtCompany=user_company, pk=pk)
-        serializer = EmployeeSerializer(employee, many=True)
+        employee = get_object_or_404(Employee, worksAtCompany=user_company, pk=pk)
+        serializer = EmployeeTimeCardSerializer(employee, many=False)
         return Response(serializer.data)
 
     @staticmethod
     def put(request, pk):
         user_company = request.user.worksAtCompany_id
-        is_manager = request.user.groups.filter(name='manager').exists()
-
-        if is_manager:
-            employee = get_object_or_404(Employee, worksAtCompany=user_company, pk=pk)
-        if request.user.is_superuser:
-            employee = get_object_or_404(Employee, pk=pk)
+        employee = get_object_or_404(Employee, worksAtCompany=user_company, pk=pk)
         serializer = EmployeeSerializer(employee, data=request.data)
         if serializer.is_valid():
             employee = serializer.save()
@@ -73,8 +62,6 @@ class EmployeeDetail(APIView):
         is_manager = request.user.groups.filter(name='manager').exists()
         if is_manager:
             employee = get_object_or_404(Employee, worksAtCompany=user_company, pk=pk)
-        if request.user.is_superuser:
-            employee = get_object_or_404(Employee, pk=pk)
         if employee:
             employee.delete()
             return Response({})

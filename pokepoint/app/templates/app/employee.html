@@ -3,17 +3,20 @@
 {% block content %}
 
 <main class="col-md-9 ms-sm-auto col-lg-10 px-md-4">
+
     <div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom">
         <h1 class="h2">Employees</h1>
-        <div class="btn-toolbar mb-2 mb-md-0">
-            <a type="button" class="btn btn-sm btn-outline-secondary" href="{% url 'add_employee' %}">+add</a>
-        </div>
+        {% if ismanager %}
+            <div class="btn-toolbar mb-2 mb-md-0">
+                <a type="button" class="btn btn-sm btn-outline-secondary" href="{% url 'add_employee' %}">+add</a>
+            </div>
+        {% endif %}
     </div>
     {% for message in messages %}
-    <div class="alert alert-success alert-dismissible fade show" role="alert">
-        <p id="messages">{{message}}</p>
-        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
-    </div>
+        <div class="alert alert-success alert-dismissible fade show" role="alert">
+            <p id="messages">{{message}}</p>
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+        </div>
     {% endfor %}
     <div class="table-responsive">
         <table class="table table-striped table-sm">
@@ -35,8 +38,12 @@
                 <td>{{employee.nif}}</td>
                 <td>{{employee.address}}</td>
                 <td>
+                    {% if ismanager or employee.id == request.user.id %}
                     <a type="button" class="btn btn-sm btn-secondary" href="{% url 'employee' employee.id %}">Edit</a>
-                    <a type="button" class="btn btn-sm btn-secondary" href="{% url 'delete_employee' employee.id %}">Delete</a>
+                    {% endif %}
+                    {% if ismanager %}
+                        <a type="button" class="btn btn-sm btn-secondary" href="{% url 'delete_employee' employee.id %}">Delete</a>
+                    {% endif %}
                 </td>
             </tr>
             {% endfor %}
