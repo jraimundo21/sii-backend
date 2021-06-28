@@ -9,15 +9,32 @@ class EmployeeForm(forms.ModelForm):
 
 
 class CheckinForm(forms.ModelForm):
+
     class Meta:
         model = CheckIn
-        fields = ['id', 'workplace', 'checkInType', 'timeCard', 'timestamp']
+        employee = forms.IntegerField()
+        timestamp = forms.DateTimeField()
+        fields = ['id', 'workplace', 'checkInType', 'timestamp', 'timeCard']
+        widgets = {'timeCard': forms.HiddenInput()}
+
+    def set_timeCard(self, timeCard):
+        data = self.data.copy()
+        data['timeCard'] = timeCard
+        self.data = data
 
 
 class CheckOutForm(forms.ModelForm):
+
     class Meta:
         model = CheckOut
-        fields = ['id', 'workplace', 'timeCard', 'timestamp']
+        timestamp = forms.DateTimeField()
+        fields = ['id', 'workplace', 'timestamp', 'timeCard']
+        widgets = {'timeCard': forms.HiddenInput()}
+
+    def set_timeCard(self, timeCard):
+        data = self.data.copy()
+        data['timeCard'] = timeCard
+        self.data = data
 
 
 class WorkplaceForm(forms.ModelForm):

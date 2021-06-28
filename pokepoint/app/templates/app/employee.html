@@ -43,7 +43,10 @@
                     {% endif %}
                     {% if ismanager %}
                         <a type="button" class="btn btn-sm btn-secondary" href="{% url 'delete_employee' employee.id %}">Delete</a>
+                        <a type="button" class="btn btn-sm btn-secondary" href="{% url 'add_checkin_by_manager' employee.id %}">Add Checkin</a>
+                        <a type="button" class="btn btn-sm btn-secondary" href="{% url 'add_checkout_by_manager' employee.id %}">Add CheOut</a>
                     {% endif %}
+
                 </td>
             </tr>
             {% endfor %}

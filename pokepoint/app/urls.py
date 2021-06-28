@@ -20,11 +20,6 @@ urlpatterns = [
     path('add/company/', addCompany, name='add_company'),
     path('edit/company/<int:pk>/', editCompany, name='edit_company'),
     path('delete/company/<int:pk>/', deleteCompany, name='delete_company'),
-    # ------- TimeCard
-    # path('timecards/', app_views.listTimecard, name='list_timecard'),
-    # path('add/timecard/', app_views.addTimecard, name='add_timecard'),
-    # path('edit/timecard/<int:pk>/', app_views.editTimecard, name='timecard'),
-    # path('delete/timecard/<int:pk>/', app_views.deleteTimecard, name='delete_timecard'),
     # ------- WorkPlace
     path('workplaces/', listWorkplace, name='list_workplace'),
     path('add/workplace/', addWorkplace, name='add_workplace'),
@@ -34,10 +29,13 @@ urlpatterns = [
     path('checkins/', listCheckin, name='list_checkin'),
     path('add/checkin/', addCheckin, name='add_checkin'),
     path('delete/checkin/<int:pk>/', deleteCheckin, name='delete_checkin'),
+    path('add/checkin/<int:pk>/', addCheckinByManager, name='add_checkin_by_manager'),
+
     # ------- checkOut
     path('checkouts/', listCheckout, name='list_checkout'),
     path('add/checkout/', addCheckout, name='add_checkout'),
     path('delete/checkout/<int:pk>/', deleteCheckout, name='delete_checkout'),
+    path('add/checkout/<int:pk>/', addCheckOutByManager, name='add_checkout_by_manager'),
 
     # ================Api===================
     path('api/login/', LoginApi.as_view(), name='api_login'),

@@ -8,18 +8,32 @@ from django.contrib.auth.decorators import login_required
 from ..forms import CompanyForm
 from django.contrib import messages
 
-
 # _________________________________________________________________Companies
-from ..serializers import TimeCardSerializer
 
 
 @login_required(login_url='login')
 def index(request):
     user_company = request.user.worksAtCompany_id
     company = Company.objects.get(id=user_company)
-    data = {'company': company}
+    company.cor = 'color'
+    print(company)
+    employee = Employee.objects.get(id=request.user.id)
+    timecards = time_work(employee)
+    data = {'company': company, 'timecards': timecards}
     template_name = 'app/index.html'
     return render(request, template_name, data)
+
+
+def time_work(employee):
+    timecards = TimeCard.objects.filter(employee=employee)
+    for timecard in timecards:
+        if hasattr(timecard, 'checkIn'):
+            check_in_time = timecard.checkIn.timestamp
+            if hasattr(timecard, 'checkOut'):
+                check_out_time = timecard.checkOut.timestamp
+                dif = check_out_time - check_in_time
+                timecard.timeWork = dif
+    return timecards
 
 
 @login_required(login_url='login')
@@ -36,7 +50,7 @@ def addCompany(request):
     if request.method == 'POST':
         if form.is_valid():
             form.save()
-            messages.success(request, 'New comany ')
+            messages.success(request, 'New Company  ')
             return redirect('index')
     return render(request, template_name, {'form': form})
 
@@ -50,7 +64,7 @@ def editCompany(request, pk):
         form = CompanyForm(request.POST, instance=company)
         if form.is_valid():
             form.save()
-            messages.success(request, 'Edited comany ')
+            messages.success(request, 'Edited company ')
             return redirect('index')
     return render(request, template_name, {'form': form, 'pageName': 'Company'})
 
