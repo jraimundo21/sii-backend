@@ -26,11 +26,8 @@ class TimeCardDetail(APIView):
     def get(request, pk):
         user_company = request.user.worksAtCompany_id
         is_manager = request.user.groups.filter(name='manager').exists()
-        if request.user.is_superuser:
-            timecard = get_object_or_404(TimeCard, pk=pk)
-        else:
-            timecard = get_object_or_404(TimeCard, checkIn__workplace__company=user_company, employee=request.user,
-                                         pk=pk)
+        timecard = get_object_or_404(TimeCard, checkIn__workplace__company=user_company, employee=request.user,
+                                     pk=pk)
         if is_manager:
             timecard = get_object_or_404(TimeCard, checkIn__workplace__company=user_company, pk=pk)
         serializer = TimeCardSerializer(timecard, many=False)
@@ -40,11 +37,8 @@ class TimeCardDetail(APIView):
     def delete(request, pk):
         user_company = request.user.worksAtCompany_id
         is_manager = request.user.groups.filter(name='manager').exists()
-        if request.user.is_superuser:
-            timecard = get_object_or_404(TimeCard, pk=pk)
-        else:
-            timecard = get_object_or_404(TimeCard, checkIn__workplace__company=user_company, employee=request.user,
-                                         pk=pk)
+        timecard = get_object_or_404(TimeCard, checkIn__workplace__company=user_company, employee=request.user,
+                                     pk=pk)
         if is_manager:
             timecard = get_object_or_404(TimeCard, checkIn__workplace__company=user_company, pk=pk)
         if timecard:

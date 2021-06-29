@@ -16,8 +16,6 @@ class CheckoutList(APIView):
         is_manager = request.user.groups.filter(name='manager').exists()
         if is_manager:
             checkout_list = CheckOut.objects.filter(workplace__company=user_company)
-        elif request.user.is_superuser:
-            checkout_list = CheckOut.objects.all()
         else:
             checkout_list = CheckOut.objects.filter(workplace__company=user_company, timeCard__employee=request.user)
         serializer = CheckOutSerializer(checkout_list, many=True)
@@ -53,7 +51,5 @@ class CheckOutDetail(APIView):
         else:
             checkout = get_object_or_404(CheckOut, workplace__company=user_company, timeCard__employee=request.user,
                                          pk=pk)
-        if request.user.is_superuser:
-            checkout = get_object_or_404(CheckOut, pk=pk)
         serializer = CheckOutSerializer(checkout)
         return Response(serializer.data)

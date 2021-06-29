@@ -17,8 +17,6 @@ class CheckInList(APIView):
         is_manager = request.user.groups.filter(name='manager').exists()
         if is_manager:
             checkin_list = CheckIn.objects.filter(workplace__company=user_company)
-        elif request.user.is_superuser:
-            checkin_list = CheckIn.objects.all()
         else:
             checkin_list = CheckIn.objects.filter(workplace__company=user_company, timeCard__employee=employee)
         serializer = CheckInSerializer(checkin_list, many=True)
@@ -55,8 +53,6 @@ class CheckInDetail(APIView):
         is_manager = request.user.groups.filter(name='manager').exists()
         if is_manager:
             checkin = get_object_or_404(CheckIn, pk=pk, workplace__company=user_company)
-        elif request.user.is_superuser:
-            checkin = get_object_or_404(CheckIn, pk=pk)
         else:
             checkin = get_object_or_404(CheckIn, workplace__company=user_company, timeCard__employee=request.user,
                                         pk=pk)

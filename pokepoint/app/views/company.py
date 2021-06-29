@@ -12,10 +12,6 @@ class CompanyList(APIView):
 
     @staticmethod
     def get(request):
-        if request.user.is_superuser:
-            companies = Company.objects.all()
-            serializer = CompanySerializer(companies, many=True)
-            return Response(serializer.data)
         user_company = request.user.worksAtCompany_id
         company_list = Company.objects.filter(id=user_company)
         serializer = CompanySerializer(company_list, many=True)
@@ -39,7 +35,7 @@ class CompanyDetail(APIView):
     def get(request, pk):
         user_company = request.user.worksAtCompany_id
 
-        if request.user.is_superuser or user_company == pk:
+        if user_company == pk:
             company = get_object_or_404(Company, pk=pk)
             serializer = CompanySerializer(company)
             return Response(serializer.data)
@@ -49,7 +45,7 @@ class CompanyDetail(APIView):
     def put(request, pk):
         user_company = request.user.worksAtCompany_id
 
-        if request.user.is_superuser or user_company == pk:
+        if user_company == pk:
             if request.user.has_perm('app.change_company'):
                 company = get_object_or_404(Company, pk=pk)
                 serializer = CompanySerializer(company, data=request.data)
@@ -57,14 +53,14 @@ class CompanyDetail(APIView):
                     serializer.save()
                     return Response(serializer.data)
                 return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
-            return Response(stauts=status.HTTP_401_UNAUTHORIZED)
+            return Response(status=status.HTTP_401_UNAUTHORIZED)
         return Response(status=status.HTTP_401_UNAUTHORIZED)
 
     @staticmethod
     def delete(request, pk):
         user_company = request.user.worksAtCompany_id
 
-        if request.user.is_superuser or user_company == pk:
+        if user_company == pk:
             if request.user.has_perm('app.delete_company'):
                 company = get_object_or_404(Company, pk=pk)
                 if company:
