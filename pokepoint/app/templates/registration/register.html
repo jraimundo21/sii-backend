@@ -2,8 +2,9 @@
 <html lang="en">
 <head>
     <meta name="viewport" content="width=device-width, initial-scale=1">
+
     <style>
-        body {
+         body {
             font-family: Arial, Helvetica,
             sans-serif;
             margin: 0;
@@ -14,17 +15,15 @@
 
         .center {
             position: absolute;
-            top: 50%;
+            top: 70%;
             left: 50%;
             transform: translate(-50%, -50%);
             width: 400px;
             background-color: #FFFFFF;
         }
-
-
-        input[type=text], input[type=password] {
+        input {
             width: 100%;
-            padding: 12px 20px;
+            padding: 10px 10px;
             margin: 8px 0;
             display: inline-block;
             border: 1px solid #ccc;
@@ -59,7 +58,15 @@
             float: right;
             padding-top: 16px;
         }
-
+       .row {
+          display: flex;
+       }
+        /* Create two equal columns that sits next to each other */
+        .column {
+          flex: 50%;
+          padding: 10px;
+          height: 300px; /* Should be removed. Only for demonstration */
+        }
         /* Change styles for span and cancel button on extra small screens */
         @media screen and (max-width: 100px) {
             span.psw {
@@ -68,7 +75,7 @@
             }
         }
     </style>
-    <title>Login</title>
+    <title>Register</title>
 </head>
 <body>
 <div class="center">
@@ -76,16 +83,16 @@
     <p>There's a error</p>
     {% endif %}
     <img src="{% static 'logo.png' %}" alt="logo" style="width:100px;">
-    <h2>Login Form</h2>
-    <form method="POST" action="{% url 'login' %}">
+    <h2>Create a company </h2>
+    <form method="POST" action="{% url 'register' %}">
         {% csrf_token %}
-        {{ form }}
-        <button type="submit">Login</button>
-        <label>
-            <input type="checkbox" checked="checked" name="remember"> Remember me
-        </label>
+         <h5>Manager</h5>
+          {{ form_employee}}
+          <h5>Company</h5>
+          {{ form_company}}
+        <button type="submit">Criar conta</button>
         <input type="hidden" name="next" value="{{ next }}">
-        <span class="psw">Não tem conta? <a  href="{% url 'register' %}">Register</a></span>
+        <span class="psw">Tem uma conta? <a href="{% url 'login' %}">Login?</a></span>
     </form>
 </div>
 </body>

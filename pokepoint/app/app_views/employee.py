@@ -29,7 +29,7 @@ def addEmployee(request):
         template_name = 'app/form.html'
         if request.method == 'POST':
             if form.is_valid():
-                form.set_password(form.password)
+                #form.set_password(form.password)
                 employee = form.save()
                 employee.set_password(employee.password)
                 Token.objects.create(user=employee)

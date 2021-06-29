@@ -31,19 +31,19 @@ class CheckInList(APIView):
         if timecard:
             tc_serialize = TimeCardSerializer(timecard)
             checkout = tc_serialize.data['checkOut']
-        if checkout:
-            # save timeCard with
-            time_card = TimeCard()
-            time_card.employee = employee
-            time_card.save()
-            request.data["timeCard"] = time_card.id
-            # add timeCard in dictionary
-            serializer = CheckInSerializer(data=request.data)
-            if serializer.is_valid():
-                serializer.save()
-                return Response(serializer.data, status=status.HTTP_201_CREATED)
-            return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
-        return Response(status.HTTP_401_UNAUTHORIZED)
+            if not checkout:
+                return Response(status.HTTP_401_UNAUTHORIZED)
+        # save timeCard with
+        time_card = TimeCard()
+        time_card.employee = employee
+        time_card.save()
+        request.data["timeCard"] = time_card.id
+        # add timeCard in dictionary
+        serializer = CheckInSerializer(data=request.data)
+        if serializer.is_valid():
+            serializer.save()
+            return Response(serializer.data, status=status.HTTP_201_CREATED)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 
 class CheckInDetail(APIView):
