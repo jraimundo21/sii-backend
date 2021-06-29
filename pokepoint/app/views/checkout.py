@@ -57,18 +57,3 @@ class CheckOutDetail(APIView):
             checkout = get_object_or_404(CheckOut, pk=pk)
         serializer = CheckOutSerializer(checkout)
         return Response(serializer.data)
-
-    @staticmethod
-    def delete(request, pk):
-        user_company = request.user.worksAtCompany_id
-        is_manager = request.user.groups.filter(name='manager').exists()
-        if request.user.is_superuser:
-            checkout = get_object_or_404(CheckOut, pk=pk)
-        else:
-            checkout = get_object_or_404(CheckOut, workplace__company=user_company, timeCard__employee=request.user,
-                                         pk=pk)
-        if is_manager:
-            checkout = get_object_or_404(CheckOut, workplace__company=user_company, pk=pk)
-        if checkout:
-            checkout.delete()
-            return Response({})

@@ -15,6 +15,9 @@ class WorkplaceList(APIView):
     @staticmethod
     def get(request, pk):
         company = get_object_or_404(Company, pk=pk)
+        user_company = request.user.worksAtCompany_id
+        if user_company != pk:
+            return Response(status=status.HTTP_401_UNAUTHORIZED)
         serializer = WorkplaceSerializer(company.workplaces, many=True)
         return Response(serializer.data)
 

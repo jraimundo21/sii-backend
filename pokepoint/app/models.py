@@ -48,7 +48,8 @@ class Employee(AbstractBaseUser, PermissionsMixin):
     nif = models.CharField(max_length=9, blank=True, null=True)
     address = models.CharField(max_length=100, blank=True, null=True)
     phone = models.CharField(max_length=20, blank=True, null=True)
-    worksAtCompany = models.ForeignKey('Company', on_delete=models.DO_NOTHING, blank=True, null=True, related_name='employees')
+    worksAtCompany = models.ForeignKey('Company', on_delete=models.DO_NOTHING, blank=True, null=True,
+                                       related_name='employees')
 
     USERNAME_FIELD = 'email'
     REQUIRED_FIELDS = ['username']
