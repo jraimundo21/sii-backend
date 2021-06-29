@@ -12,16 +12,6 @@ class Migration(migrations.Migration):
 
     operations = [
         migrations.AlterField(
-            model_name='checkin',
-            name='timeCard',
-            field=models.OneToOneField(on_delete=django.db.models.deletion.DO_NOTHING, related_name='checkIn', to='app.timecard'),
-        ),
-        migrations.AlterField(
-            model_name='checkout',
-            name='timeCard',
-            field=models.OneToOneField(on_delete=django.db.models.deletion.DO_NOTHING, related_name='checkOut', to='app.timecard'),
-        ),
-        migrations.AlterField(
             model_name='employee',
             name='worksAtCompany',
             field=models.ForeignKey(blank=True, null=True, on_delete=django.db.models.deletion.DO_NOTHING, related_name='employees', to='app.company'),

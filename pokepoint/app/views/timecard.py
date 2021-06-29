@@ -74,4 +74,4 @@ class TimeCardDetail(APIView):
         if timecard:
             timecard.delete()
             return Response({})
-        return Response(status.HTTP_401_UNAUTHORIZED)
+        return Response(status=status.HTTP_401_UNAUTHORIZED)

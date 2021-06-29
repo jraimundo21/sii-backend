@@ -41,11 +41,12 @@ class TimeCardSerializer(serializers.ModelSerializer):
             return time_card
 
     def get_time_work(self, instance):
-        if hasattr(instance,'checkOut'):
+        if hasattr(instance, 'checkOut') and hasattr(instance, 'checkIn'):
             check_in_time = f'{instance.checkIn.timestamp}'
             check_out_time = f'{instance.checkOut.timestamp}'
             f = '%Y-%m-%d %H:%M:%S'
-            dif = int(((datetime.strptime(check_out_time[0:19], f)-datetime.strptime(check_in_time[0:19], f)).total_seconds()*1000))
+            dif = int(((datetime.strptime(check_out_time[0:19], f) - datetime.strptime(check_in_time[0:19],
+                                                                                       f)).total_seconds() * 1000))
             return dif
         return 0
 
@@ -57,7 +58,6 @@ class GroupSerializer(serializers.ModelSerializer):
 
 
 class EmployeeSerializer(serializers.ModelSerializer):
-
     class Meta:
         model = Employee
         fields = ['username', 'email', 'name', 'nif', 'address', 'phone', 'worksAtCompany']

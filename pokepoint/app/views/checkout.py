@@ -28,7 +28,7 @@ class CheckoutList(APIView):
         # get checkin timecard
         timecard = TimeCard.objects.filter(employee=pk).last()
         if not timecard:
-            return Response(status.HTTP_401_UNAUTHORIZED)
+            return Response(status=status.HTTP_401_UNAUTHORIZED)
         tc_serialize = TimeCardSerializer(timecard)
         checkout = tc_serialize.data['checkOut']
         if not checkout:
@@ -38,7 +38,7 @@ class CheckoutList(APIView):
                 serializer.save()
                 return Response(serializer.data, status=status.HTTP_201_CREATED)
             return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
-        return Response(status.HTTP_401_UNAUTHORIZED)
+        return Response(status=status.HTTP_401_UNAUTHORIZED)
 
 
 class CheckOutDetail(APIView):

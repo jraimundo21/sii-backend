@@ -32,7 +32,7 @@ class CheckInList(APIView):
             tc_serialize = TimeCardSerializer(timecard)
             checkout = tc_serialize.data['checkOut']
             if not checkout:
-                return Response(status.HTTP_401_UNAUTHORIZED)
+                return Response(status=status.HTTP_401_UNAUTHORIZED)
         # save timeCard with
         time_card = TimeCard()
         time_card.employee = employee

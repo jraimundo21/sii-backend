@@ -16,7 +16,10 @@ class CompanyList(APIView):
             companies = Company.objects.all()
             serializer = CompanySerializer(companies, many=True)
             return Response(serializer.data)
-        return Response(status.HTTP_401_UNAUTHORIZED)
+        user_company = request.user.worksAtCompany_id
+        company_list = Company.objects.filter(id=user_company)
+        serializer = CompanySerializer(company_list, many=True)
+        return Response(serializer.data)
 
     @staticmethod
     def post(request):
@@ -26,7 +29,7 @@ class CompanyList(APIView):
                 serializer.save()
                 return Response(serializer.data, status=status.HTTP_201_CREATED)
             return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
-        return Response(status.HTTP_401_UNAUTHORIZED)
+        return Response(status=status.HTTP_401_UNAUTHORIZED)
 
 
 class CompanyDetail(APIView):
@@ -40,7 +43,7 @@ class CompanyDetail(APIView):
             company = get_object_or_404(Company, pk=pk)
             serializer = CompanySerializer(company)
             return Response(serializer.data)
-        return Response(status.HTTP_401_UNAUTHORIZED)
+        return Response(status=status.HTTP_401_UNAUTHORIZED)
 
     @staticmethod
     def put(request, pk):
@@ -54,8 +57,8 @@ class CompanyDetail(APIView):
                     serializer.save()
                     return Response(serializer.data)
                 return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
-            return Response(status.HTTP_401_UNAUTHORIZED)
-        return Response(status.HTTP_401_UNAUTHORIZED)
+            return Response(stauts=status.HTTP_401_UNAUTHORIZED)
+        return Response(status=status.HTTP_401_UNAUTHORIZED)
 
     @staticmethod
     def delete(request, pk):
@@ -67,5 +70,5 @@ class CompanyDetail(APIView):
                 if company:
                     company.delete()
                 return Response({})
-            return Response(status.HTTP_401_UNAUTHORIZED)
-        return Response(status.HTTP_401_UNAUTHORIZED)
+            return Response(status=status.HTTP_401_UNAUTHORIZED)
+        return Response(status=status.HTTP_401_UNAUTHORIZED)
