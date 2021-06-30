@@ -6,13 +6,15 @@ from .views import *
 urlpatterns = [
 
     # ------- Auth
-    # path('', include('django.contrib.auth.urls')),
+    path('', include('django.contrib.auth.urls')),
     path('logouts/', logoutUser, name='logout_user'),
     path('index', index, name='index'),
+    path('', home, name='pokepoint'),
     path('register', register, name='register'),
 
     # ----------Employee
     path('employees/', listEmployee, name='list_employee'),
+    path('show/employees/<int:pk>/', showEmployee, name='show_employee'),
     path('add/employees/', addEmployee, name='add_employee'),
     path('edit/employees/<int:pk>/', editEmployee, name='employee'),
     path('delete/employees/<int:pk>/', deleteEmployee, name='delete_employee'),

@@ -1,0 +1,56 @@
+{% extends "app/layout/layout.html" %}
+
+{% block content %}
+<main class="col-md-9 ms-sm-auto col-lg-10 px-md-4">
+    <div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom">
+        <h1 class="h2">Employee </h1>
+    </div>
+     {% for message in messages %}
+    <div class="alert alert-success alert-dismissible fade show" role="alert">
+        <p id="messages">{{message}}</p>
+        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+    </div>
+    {% endfor %}
+    <div class="row ">
+        <div class="col cols-md-3 g-4">
+            <div class="card">
+                <div class="card-body">
+                    <p> Name: {{employee.name}}</p>
+                    <p> Address:{{employee.address}}</p>
+                    <p> Nif: {{employee.nif}} </p>
+                    <p> Phone: {{employee.phone}}</p>
+                    <a type="button" class="btn btn-sm btn-secondary" href="{% url 'delete_employee' employee.id %}">Delete</a>
+                    <a type="button" class="btn btn-sm btn-secondary" href="{% url 'add_checkin_by_manager' employee.id %}">Add Checkin</a>
+                    <a type="button" class="btn btn-sm btn-secondary" href="{% url 'add_checkout_by_manager' employee.id %}">Add CheOut</a>
+                </div>
+            </div>
+        </div>
+         <div class="col cols-md-3 g-4">
+             <div class="card">
+                <div class="card-body">
+                    <table class="table table-striped table-sm">
+                        <thead>
+                        <tr>
+                            <th>Check-in</th>
+                            <th>Check-out</th>
+                            <th>Horas de trabalho</th>
+                        </tr>
+                        </thead>
+                        <tbody>
+                            {% for timecard in timecards %}
+                                <tr>
+                                    <td>{{timecard.checkIn.timestamp|date:"h:i"}}</td>
+                                    <td>{{timecard.checkOut.timestamp|date:"h:i"}}</td>
+                                    <td>{{timecard.timeWork}}</td>
+                               </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+        </div>
+
+    </div>
+</main>
+{% endblock content %}

@@ -1,0 +1,156 @@
+{% load static %}
+<!DOCTYPE html>
+<html>
+<head>
+	<title>Poke- point</title>
+	 <!-- for font icons -->
+	<link rel="stylesheet" type="text/css" href="https://stackpath.bootstrapcdn.com/font-awesome/4.7.0/css/font-awesome.min.css">
+<style>
+	 body{
+	 	 font-family: Arial, Helvetica, sans-serif;
+	 }
+	 .tableposter {
+		  min-height:500px;
+		  background-image:url("{% static 'poster.png'%}");
+		  background-repeat: no-repeat;
+		  background-position: center center;
+	  }
+     a {
+          color: white;
+          padding: 14px 20px;
+          margin: 8px 0;
+          border: none;
+          cursor: pointer;
+          width: 100%;
+	      text-decoration: none;
+		  font-size: 16px;
+		  color:  #ffffff;
+        }
+	 .abg{
+		 background-color: #04AA6D;
+	 }
+	 h2{
+		   color:  #ffffff;
+	  }
+	 .title{
+		  font-size: 25px;
+		  color:  #ffffff;
+	  }
+	 .p1{
+		  font-size: 16px;
+		  color: #c2c0c3;
+	 }
+</style>
+	</head>
+
+<body style="margin:0">
+
+<!-- Start Header -->
+<table border="0" width="100%" cellpadding="0" cellspacing="0" bgcolor="#F05729">
+  <tr>
+  	 <td>
+  	 	<table border="0" width="85%" cellpadding="15" cellspacing="0" align="center">
+           <tr>
+           	   <td>
+           	   	  <img src="{% static 'logot.png'%}" width="20%" alt="me" />
+           	   </td>
+           	   <td width="30%">&nbsp;</td>
+           		<td>
+					<a href="#pokepoint">
+           	          Pokepoint
+           	       </a>
+           	    </td>
+           	   <td>
+				   <a href="#poster">
+					   Poster
+					</a>
+           	   </td>
+
+           </tr>
+  	 	</table>
+  	 </td>
+  </tr>
+</table>
+<!-- End Header -->
+
+<!-- Pokepoint -->
+<table border="0" id="pokepoint" width="100%" cellpadding="0" cellspacing="0" bgcolor="#11443C">
+  <tr>
+  	 <td>
+  	 	<table border="0" width="85%" cellpadding="15" cellspacing="0" align="center">
+  	 		<!-- Heading Start-->
+           <tr>
+           	  <td height="70" align="center" valign="middle" colspan="2">
+           	  	 <h2>
+           	  	  Poke - Point
+				 </h2>
+           	  	<hr width="70" color="#f3971b">
+           	  </td>
+           </tr>
+           <!-- Heading  End-->
+           <tr>
+           	   <td width="35%">
+           	   	  <img src="{% static 'phoneApp.png'%}" width="100%" alt="gifmobileapp" />
+           	   </td>
+           	   <td width="65%" valign="top">
+           	   	  <table border="0" width="100%" cellpadding="0" cellspacing="0" align="center">
+           	   	  	  <tr>
+           	   	  	  	<td>
+ 							<p class="title"> O que é?</p>
+							<p class="p1" >
+           	   	  	  			Sistema de registro e controle de entradas e saídas de funcionários em uma empresa. Inicialmente pensado para empresas
+								do ramo de construção civil, mas extensível a outras áreas de actividade como lojas.
+           	   	  	  		</p>
+ 							<p class="title"> Porquê?</p>
+							<p class="p1" >
+           	   	  	  			 É frequente a existência de listas de ponto em varias empresas em especial em empresas de contrução civil, este registo normalmente é feito em papeis o que facilmente pode ser extraviado,
+   							     ou danificado o que impede que seja feito um controle fiel das horas de trabalho de cada funcionário, além dessa solução ser muito trabalhosa
+							</p>
+ 							<p class="title"> Como ? </p>
+           	   	  	  		<p class="p1" >
+           	   	  	  			Com o conhecimento adquirido nas unidades curriculares de AMS e SII,
+                                foram projectados uma aplicação web para o gerentes e funcionários e uma aplicação móvel para auxiliar os funcionários no registro das suas  entradas e saídas.
+           	   	  	  		</p>
+ 							<p class="title"> Desenvolvido por: </p>
+           	   	  	  	     <p class="p1" >
+                                André dos Santos Martins Ribeiro<br>
+								Edna Patrícia Gaspar Martins <br>
+                                João Nuno Centeno Raimundo
+							</p>
+							<a href="{% static 'allposter.png'%}" download> Download poster
+							</a>
+           	   	  	  		</p>
+           	   	  	  		<hr noshade>
+           	   	  	  		<br/>
+           	   	  	  		<a class="abg" type="button" href="{% url 'login' %}" >
+           	   	  	  		    Login
+           	   	  	  		</a>
+           	   	  	  		&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+           	   	  	  		<a class="abg" type="button" href="{% url 'register' %}">
+           	   	  	  		    Registrar-se
+           	   	  	  	    </a>
+           	   	  	  	</td>
+           	   	  	  </tr>
+           	   	  </table>
+           	   </td>
+           </tr>
+          <!-- section padding bottom -->
+           <tr>
+           	  <td height="60" colspan="2">
+
+           	  </td>
+           </tr>
+          <!-- section padding bottom End-->
+        </table>
+      </td>
+   </tr>
+</table>
+<!-- Pokepoint -->
+
+<!-- Start Services -->
+<table class ="tableposter" border="0" id="poster" width="100%" cellpadding="0" cellspacing="0">
+
+</table>
+<!-- End Services -->
+</body>
+</html>

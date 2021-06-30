@@ -3,6 +3,7 @@ from django.shortcuts import render, get_object_or_404, \
 from rest_framework import status
 from rest_framework.response import Response
 
+from . import time_work
 from ..models import Employee
 from django.contrib.auth.decorators import login_required
 from ..forms import EmployeeForm
@@ -40,6 +41,18 @@ def addEmployee(request):
     messages.error(request, 'Não tem permissão para aceder a pagina')
     return redirect('list_employee')
 
+
+@login_required(login_url='login')
+def showEmployee(request, pk):
+    is_manager = request.user.groups.filter(name='manager').exists()
+    if is_manager or pk == request.user.id:
+        employee = Employee.objects.get(id=pk)
+        timecards = time_work(employee)
+        data = {'employee': employee, 'timecards': timecards}
+        template_name = 'app/showEmployee.html'
+        return render(request, template_name, data)
+    messages.error(request, 'Não tem permissão para aceder a página')
+    return redirect('list_employee')
 
 @login_required(login_url='login')
 def editEmployee(request, pk):

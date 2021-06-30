@@ -5,9 +5,13 @@ from django.contrib.auth.models import Group
 from django.contrib.auth import authenticate, logout, login
 from rest_framework.authtoken.models import Token
 
-
 # _______Login
 from ..forms import CompanyForm, EmployeeForm, EmployeeFormCreate
+
+
+def home(request):
+    template_name = 'app/home.html'
+    return render(request, template_name)
 
 
 def logoutUser(request):
@@ -39,5 +43,5 @@ def register(request):
                 login(request, user)
                 return redirect('index')
 
-    return render(request, template_name, {'form_company': form_company, 'form_employee': form_employee, 'pageName': page_name})
-
+    return render(request, template_name,
+                  {'form_company': form_company, 'form_employee': form_employee, 'pageName': page_name})
