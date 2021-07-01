@@ -6,7 +6,17 @@ class EmployeeForm(forms.ModelForm):
     class Meta:
         model = Employee
         fields = ['username', 'email', 'password', 'name', 'nif', 'address', 'phone', 'worksAtCompany']
+        widgets = {'username': forms.HiddenInput(), 'worksAtCompany': forms.HiddenInput()}
 
+    def set_worksAtCompany(self, company):
+        data = self.data.copy()
+        data['worksAtCompany'] = company
+        self.data = data
+
+    def set_username(self, username):
+        data = self.data.copy()
+        data['username'] = username
+        self.data = data
 
 class EmployeeFormCreate(forms.ModelForm):
     class Meta:

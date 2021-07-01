@@ -38,7 +38,7 @@ def time_work(query, employee):
                 dif = check_out_time - check_in_time
                 timecard.timeWork = dif
                 workHours = workHours + (dif.total_seconds() / 3600)
-    workHours= '{0:02.0f}:{1:02.0f}'.format(*divmod(workHours * 60, 60))
+    workHours = '{0:02.0f}:{1:02.0f}'.format(*divmod(workHours * 60, 60))
     return timecards, workHours
 
 

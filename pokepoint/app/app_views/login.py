@@ -36,9 +36,7 @@ def register(request):
             employee.groups.add(manager)
             Token.objects.create(user=employee)
             messages.success(request, 'Conta criada com sucesso')
-
             user = authenticate(request, username=employee.email, password=form_employee.data['password'])
-            print('==================', user)
             if user is not None:
                 login(request, user)
                 return redirect('index')

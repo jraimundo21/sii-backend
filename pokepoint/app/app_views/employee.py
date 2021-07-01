@@ -18,17 +18,20 @@ def listEmployee(request):
     employees = Employee.objects.filter(worksAtCompany=user_company)
     is_manager = request.user.groups.filter(name='manager').exists()
     template_name = 'app/employee.html'
-    return render(request, template_name, {'employees': employees, 'ismanager':is_manager})
+    return render(request, template_name, {'employees': employees, 'ismanager': is_manager})
 
 
 @login_required(login_url='login')
 def addEmployee(request):
     is_manager = request.user.groups.filter(name='manager').exists()
+    user_company = request.user.worksAtCompany_id
     if is_manager:
         form = EmployeeForm(request.POST or None)
         page_name = 'Add Employee'
         template_name = 'app/form.html'
         if request.method == 'POST':
+            form.set_username(form.data['email'])
+            form.set_worksAtCompany(user_company)
             if form.is_valid():
                 employee = form.save()
                 employee.set_password(employee.password)
