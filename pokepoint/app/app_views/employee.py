@@ -68,7 +68,6 @@ def editEmployee(request, pk):
             if form.is_valid():
                 employee = form.save()
                 employee.set_password(employee.password)
-                Token.objects.create(user=employee)
                 employee.save()
                 return redirect('list_employee')
         return render(request, template_name, {'form': form, 'pageName': page_name})
