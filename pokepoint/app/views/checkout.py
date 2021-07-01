@@ -12,6 +12,8 @@ class CheckoutList(APIView):
 
     @staticmethod
     def get(request, pk):
+        if request.user.id != pk:
+            return Response(status=status.HTTP_401_UNAUTHORIZED)
         user_company = request.user.worksAtCompany_id
         is_manager = request.user.groups.filter(name='manager').exists()
         if is_manager:
@@ -23,6 +25,8 @@ class CheckoutList(APIView):
 
     @staticmethod
     def post(request, pk):
+        if request.user.id != pk:
+            return Response(status=status.HTTP_401_UNAUTHORIZED)
         # get checkin timecard
         timecard = TimeCard.objects.filter(employee=pk).last()
         if not timecard:
@@ -44,6 +48,8 @@ class CheckOutDetail(APIView):
 
     @staticmethod
     def get(request, pk):
+        if request.user.id != pk:
+            return Response(status=status.HTTP_401_UNAUTHORIZED)
         user_company = request.user.worksAtCompany_id
         is_manager = request.user.groups.filter(name='manager').exists()
         if is_manager:

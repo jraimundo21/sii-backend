@@ -12,6 +12,8 @@ class CheckInList(APIView):
 
     @staticmethod
     def get(request, pk):
+        if request.user.id != pk:
+            return Response(status=status.HTTP_401_UNAUTHORIZED)
         employee = get_object_or_404(Employee, pk=pk)
         user_company = request.user.worksAtCompany_id
         is_manager = request.user.groups.filter(name='manager').exists()
@@ -24,6 +26,8 @@ class CheckInList(APIView):
 
     @staticmethod
     def post(request, pk):
+        if request.user.id != pk:
+            return Response(status=status.HTTP_401_UNAUTHORIZED)
         employee = get_object_or_404(Employee, pk=pk)
         timecard = TimeCard.objects.filter(employee=employee).last()
         if timecard:
@@ -49,6 +53,8 @@ class CheckInDetail(APIView):
 
     @staticmethod
     def get(request, pk):
+        if request.user.id != pk:
+            return Response(status=status.HTTP_401_UNAUTHORIZED)
         user_company = request.user.worksAtCompany_id
         is_manager = request.user.groups.filter(name='manager').exists()
         if is_manager:
