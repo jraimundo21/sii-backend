@@ -70,7 +70,7 @@ def editEmployee(request, pk):
             form = EmployeeForm(request.POST, instance=employee)
             if form.is_valid():
                 employee = form.save()
-                employee.set_password(employee.password)
+                #employee.set_password(employee.password)
                 employee.save()
                 return redirect('list_employee')
         return render(request, template_name, {'form': form, 'pageName': page_name})
