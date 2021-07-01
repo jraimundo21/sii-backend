@@ -71,3 +71,12 @@ class CompanyForm(forms.ModelForm):
     class Meta:
         model = Company
         fields = ['id', 'name', 'nif', 'address', 'email', 'phone']
+
+
+class MonthForm(forms.Form):
+    Months = [
+        ('','Escolha um mês'), ('01', 'Janeiro'), ('02', 'Fevereiro'), ('03', 'Março'),('04', 'Abril'),
+        ('05', 'Maio'), ('06', 'Junho'), ('07', 'Julho'),('08', 'Agosto'),
+        ('09', 'Setembro'), ('10', 'Outubro'), ('11', 'Novembro'), ('12', 'Dezembro')
+    ]
+    months_Year = forms.CharField(label='', widget=forms.Select(choices=Months))

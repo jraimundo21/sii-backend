@@ -75,7 +75,9 @@
     {% if forms.errors %}
     <p>There's a error</p>
     {% endif %}
+    <a href="{% url 'pokepoint'%}">
     <img src="{% static 'logo.png' %}" alt="logo" style="width:100px;">
+    </a>
     <h2>Login Form</h2>
     <form method="POST" action="{% url 'login' %}">
         {% csrf_token %}

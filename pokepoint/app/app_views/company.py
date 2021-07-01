@@ -5,7 +5,7 @@ from django.shortcuts import render, get_object_or_404, \
 
 from ..models import Company, Employee, TimeCard, CheckIn, CheckOut
 from django.contrib.auth.decorators import login_required
-from ..forms import CompanyForm
+from ..forms import CompanyForm, MonthForm
 from django.contrib import messages
 
 # _________________________________________________________________Companies
@@ -15,17 +15,21 @@ from django.contrib import messages
 def index(request):
     user_company = request.user.worksAtCompany_id
     company = Company.objects.get(id=user_company)
-    company.cor = 'color'
-    print(company)
     employee = Employee.objects.get(id=request.user.id)
-    timecards = time_work(employee)
-    data = {'company': company, 'timecards': timecards}
+    query = request.GET.get("months_Year")
+    monthForm = MonthForm(initial={'months_Year': query})
+    (timecards, workHours) = time_work(query, employee)
+    data = {'company': company, 'timecards': timecards, 'monthForm': monthForm, 'workHours': workHours}
     template_name = 'app/index.html'
     return render(request, template_name, data)
 
 
-def time_work(employee):
-    timecards = TimeCard.objects.filter(employee=employee)
+def time_work(query, employee):
+    workHours = 0
+    if query:
+        timecards = TimeCard.objects.filter(employee=employee, checkOut__timestamp__month=query, checkIn__timestamp__month=query)
+    else:
+        timecards = TimeCard.objects.filter(employee=employee)
     for timecard in timecards:
         if hasattr(timecard, 'checkIn'):
             check_in_time = timecard.checkIn.timestamp
@@ -33,7 +37,8 @@ def time_work(employee):
                 check_out_time = timecard.checkOut.timestamp
                 dif = check_out_time - check_in_time
                 timecard.timeWork = dif
-    return timecards
+                workHours = int(workHours + (dif.total_seconds() / 3600))
+    return timecards, workHours
 
 
 @login_required(login_url='login')

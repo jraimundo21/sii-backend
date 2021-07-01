@@ -6,7 +6,7 @@ from rest_framework.response import Response
 from . import time_work
 from ..models import Employee
 from django.contrib.auth.decorators import login_required
-from ..forms import EmployeeForm
+from ..forms import EmployeeForm, MonthForm
 from django.contrib import messages
 from rest_framework.authtoken.models import Token
 
@@ -30,7 +30,6 @@ def addEmployee(request):
         template_name = 'app/form.html'
         if request.method == 'POST':
             if form.is_valid():
-                #form.set_password(form.password)
                 employee = form.save()
                 employee.set_password(employee.password)
                 Token.objects.create(user=employee)
@@ -47,8 +46,10 @@ def showEmployee(request, pk):
     is_manager = request.user.groups.filter(name='manager').exists()
     if is_manager or pk == request.user.id:
         employee = Employee.objects.get(id=pk)
-        timecards = time_work(employee)
-        data = {'employee': employee, 'timecards': timecards}
+        query = request.GET.get("months_Year")
+        monthForm = MonthForm(initial={'months_Year': query})
+        (timecards, workHours) = time_work(query, employee)
+        data = {'employee': employee, 'timecards': timecards, 'monthForm': monthForm, 'workHours': workHours}
         template_name = 'app/showEmployee.html'
         return render(request, template_name, data)
     messages.error(request, 'Não tem permissão para aceder a página')
