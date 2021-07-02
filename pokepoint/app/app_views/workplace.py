@@ -14,17 +14,19 @@ def listWorkplace(request):
     user_company = request.user.worksAtCompany_id
     workplaces = Workplace.objects.filter(company=user_company)
     template_name = 'app/workplace.html'
-    return render(request, template_name, {'workplaces': workplaces, 'ismanager':is_manager})
+    return render(request, template_name, {'workplaces': workplaces, 'ismanager': is_manager})
 
 
 @login_required(login_url='login')
 def addWorkplace(request):
+    user_company = request.user.worksAtCompany_id
     is_manager = request.user.groups.filter(name='manager').exists()
     if is_manager:
         form = WorkplaceForm(request.POST or None)
         template_name = 'app/form.html'
         page_name = 'Add Workplace'
         if request.method == 'POST':
+            form.set_company(user_company)
             if form.is_valid():
                 form.save()
                 messages.success(request, 'New Workplace ')
@@ -36,6 +38,7 @@ def addWorkplace(request):
 
 @login_required(login_url='login')
 def editWorkplace(request, pk):
+    user_company = request.user.worksAtCompany_id
     is_manager = request.user.groups.filter(name='manager').exists()
     if is_manager:
         workplace = Workplace.objects.get(id=pk)
@@ -44,6 +47,7 @@ def editWorkplace(request, pk):
         page_name = 'Editor Workplace'
         if request.method == 'POST':
             form = WorkplaceForm(request.POST, instance=workplace)
+            form.set_company(user_company)
             if form.is_valid():
                 form.save()
                 messages.success(request, 'Workplace Edited')

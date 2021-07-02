@@ -68,8 +68,13 @@ class CheckOutForm(forms.ModelForm):
 class WorkplaceForm(forms.ModelForm):
     class Meta:
         model = Workplace
-        fields = ['id', 'company', 'address', 'name']
+        fields = ['company', 'address', 'name', 'latitude', 'longitude']
+        widgets = {'company': forms.HiddenInput()}
 
+    def set_company(self, company):
+        data = self.data.copy()
+        data['company'] = company
+        self.data = data
 
 class TimeCardForm(forms.ModelForm):
     class Meta:

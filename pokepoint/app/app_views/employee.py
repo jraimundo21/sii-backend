@@ -58,6 +58,7 @@ def showEmployee(request, pk):
     messages.error(request, 'Não tem permissão para aceder a página')
     return redirect('list_employee')
 
+
 @login_required(login_url='login')
 def editEmployee(request, pk):
     is_manager = request.user.groups.filter(name='manager').exists()
@@ -69,9 +70,11 @@ def editEmployee(request, pk):
         if request.method == 'POST':
             form = EmployeeForm(request.POST, instance=employee)
             if form.is_valid():
-                employee = form.save()
-                #employee.set_password(employee.password)
-                employee.save()
+                employee_save = form.save()
+                if employee.password != form.data['password']:
+                    employee_save.set_password(employee.password)
+                    employee_save.save()
+                messages.success(request, 'Employee Edited')
                 return redirect('list_employee')
         return render(request, template_name, {'form': form, 'pageName': page_name})
     messages.error(request, 'Não tem permissão para aceder a pagina')
