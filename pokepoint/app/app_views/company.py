@@ -20,7 +20,7 @@ def index(request):
     monthForm = MonthForm(initial={'months_Year': query})
     (timecards, workHours) = time_work(query, employee)
     is_manager = request.user.groups.filter(name='manager').exists()
-    data = {'company': company, 'timecards': timecards, 'monthForm': monthForm, 'workHours': workHours, 'is_manager': is_manager}
+    data = {'company': company, 'timecards': timecards, 'monthForm': monthForm, 'workHours': workHours, 'ismanager': is_manager}
     template_name = 'app/index.html'
     return render(request, template_name, data)
 
